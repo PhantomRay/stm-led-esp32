@@ -4,6 +4,7 @@
         "i2s_struct.h": "c",
         "periph_ctrl.h": "c",
         "gpio.h": "c",
-        "random": "cpp"
+        "random": "cpp",
+        "esp_intr_alloc.h": "c"
     }
 }

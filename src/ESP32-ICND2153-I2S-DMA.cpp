@@ -16,12 +16,12 @@ void IRAM_ATTR ICND2153_I2S_DMA::i2s_isr_cb_dma2153(){
     dmadesc_b[desccount_b-1].qe.stqe_next=(lldesc_t*)&dmadesc_b[0];
   }
   else{
-    if(framebuffer_release_flag == false){
-      framebuffer_release_flag = true;
-    }
+    // if(framebuffer_release_flag == false){
+    //   framebuffer_release_flag = true;
+    // }
+    framebuffer_release_flag = true;
   }
 }
-
 
 bool ICND2153_I2S_DMA::IsRelaseBuffer(){
   if((new_frame_ready_flag == false) && (framebuffer_release_flag == true)){
@@ -30,11 +30,21 @@ bool ICND2153_I2S_DMA::IsRelaseBuffer(){
   return false;
 }
 
-void ICND2153_I2S_DMA::showDMABuffer(){
+/*when wait_flag is true, wait until framebuffer is released*/
+//if you use false for wait_flag, you must call IsRelaseBuffer() before updating a frame buffer.
+void ICND2153_I2S_DMA::showDMABuffer(bool wait_flag){
   dmadesc_b[desccount_b-1].qe.stqe_next=(lldesc_t*)&dmadesc_a[0];
   new_frame_ready_flag = true;
+  
+  if(wait_flag){
+    Serial.println("framebuffer is locked");
+    unsigned long pass_tm, start_tm;
+    start_tm = millis();
+    while(!IsRelaseBuffer()){};
+    Serial.printf("framebuffer is released. locked time: %d\n", millis() - start_tm);
+  }
 
-  // {    
+  // {
   //     if (!double_buffering_enabled) return;
   //     #if SERIAL_DEBUG     
   //             Serial.printf("Showtime for buffer: %d\n", back_buffer_id);

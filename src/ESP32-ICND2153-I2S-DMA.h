@@ -91,10 +91,7 @@ class ICND2153_I2S_DMA : public Adafruit_GFX {
   public:
     
     /**
-     * ICND2153_I2S_DMA 
-     * 
-     * @param  {bool} _double_buffer : Double buffer is disabled by default. Enable only if you know what you're doing. Manual switching required with flipDMABuffer() and showDMABuffer()
-     * 
+     * ICND2153_I2S_DMA
      */
     ICND2153_I2S_DMA(bool _double_buffer = false)
 #ifdef USE_GFX_ROOT	
@@ -144,7 +141,7 @@ class ICND2153_I2S_DMA : public Adafruit_GFX {
     // }
 
     bool IsRelaseBuffer();
-    void showDMABuffer();    
+    void showDMABuffer(bool wait_flag);
     
     inline void setPanelBrightness(int b)
     {
