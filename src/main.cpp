@@ -16,13 +16,12 @@ void setup() {
 
   /*register callback for I2S DMA interrupt*/
   // setShiftCompleteCallback(i2s_isr_cb);
-  //to test DAM, led_matrix.begin(true);
+  // to test DAM, led_matrix.begin(true);
   display_init();
 
   // xTaskCreate(&display_task, "command_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
   command_init();
-  xTaskCreate(&command_task, "command_task", 4096/*configMINIMAL_STACK_SIZE*/, NULL, 5, NULL);
-  
+  xTaskCreate(&command_task, "command_task", 4096 /*configMINIMAL_STACK_SIZE*/, NULL, 5, NULL);
 
   prev_tm = millis();
   load_tm = millis();
@@ -31,9 +30,9 @@ void setup() {
 }
 
 /* current log result: pass_tm - 24 or 25ms = (10 or 11) + 14*/
-void loop() {   
+void loop() {
   // unsigned long pass_tm, start_tm;
-  
+
   //   // led_matrix.load_test_screen();
   //   // led_matrix.showDMABuffer(true);
 
@@ -50,6 +49,4 @@ void loop() {
 
   //     led_matrix.showDMABuffer(true);
   //   }
-
 }
-
