@@ -67,19 +67,19 @@ static void command_parsing(const String cmd_buf)
         // Serial.println();
     }
 
-    // int cmd_num = 0;
-    // LED_COMMAND_DESCRIPTION *command_desc_tmp = command_desc_first;
-    // while(command_desc_tmp != NULL){
-    //     Serial.printf("type-%s,parameter-%s\n", command_desc_tmp->cmd.type, command_desc_tmp->cmd.parameter);
-    //     // String parameter = command_desc_tmp->cmd.parameter;
-    //     // for(int char_id = 0; char_id < parameter.length(); char_id++){
-    //     //     Serial.printf("%x,", parameter.c_str()[char_id]);
-    //     // }
-    //     // Serial.println();
-    //     command_desc_tmp = (LED_COMMAND_DESCRIPTION*)(command_desc_tmp->qe_next);
-    //     cmd_num++;
-    // }
-    // Serial.printf("Command:%d\n", cmd_num);
+    int cmd_num = 0;
+    LED_COMMAND_DESCRIPTION *command_desc_tmp = command_desc_first;
+    while(command_desc_tmp != NULL){
+        // Serial.printf("type-%s,parameter-%s\n", command_desc_tmp->cmd.type, command_desc_tmp->cmd.parameter);
+        // String parameter = command_desc_tmp->cmd.parameter;
+        // for(int char_id = 0; char_id < parameter.length(); char_id++){
+        //     Serial.printf("%x,", parameter.c_str()[char_id]);
+        // }
+        // Serial.println();
+        command_desc_tmp = (LED_COMMAND_DESCRIPTION*)(command_desc_tmp->qe_next);
+        cmd_num++;
+    }
+    Serial.printf("Command:%d\n", cmd_num);
 
 }
 
