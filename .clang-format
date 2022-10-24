@@ -1,0 +1,14 @@
+BasedOnStyle: LLVM
+Standard: Cpp11
+IndentWidth: 2
+ColumnLimit: 120
+BreakBeforeBraces: Attach
+AllowShortIfStatementsOnASingleLine: true
+IndentCaseLabels: true
+PointerAlignment: Right
+AlignOperands: true
+AlignConsecutiveAssignments: true
+AccessModifierOffset: -2
+AllowShortCaseLabelsOnASingleLine: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+SortIncludes: false
