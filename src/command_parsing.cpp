@@ -6,14 +6,18 @@
 // This means, clear the screen, set font to "font1", text size 10, set background to 255,0,0, text color 0,255,0, cursor set to 10,20, print "HELLO, WORLD!"
 
 // command_type_num = sizeof(command_type) / sizeof(command_type[0]);
-#define COMMAND_TYPE_NUM 9
-const String command_type[COMMAND_TYPE_NUM]={"CL", "BR", "F", "S", "BG", "TC", "CR", "P", "D"};
-String command_buffer;// ="CL;F:font1;S:10;BG:255,0,0;TC:0,255,0;CR:10,20;P:\\HELLO, WORLD!\\;D:5000;CL\r";
+#define COMMAND_TYPE_NUM 11
+const String command_type[COMMAND_TYPE_NUM]={"CL", "BR", "F", "S", "BG", "TC", "CR", "P", "I", "D", "FL"};
+String command_buffer="";// ="CL;F:font1;S:10;BG:255,0,0;TC:0,255,0;CR:10,20;P:\\HELLO, WORLD!\\;D:5000;CL\r";
 const char command_separate_char = ';';
 const char parameter_separate_char = ':';
 
 LED_COMMAND_DESCRIPTION *command_desc_first = NULL;
 LED_COMMAND_DESCRIPTION *command_desc_last = NULL;
+
+LED_COMMAND_DESCRIPTION *command_desc[2];
+uint8_t current_display_description_id = 0;
+volatile bool command_desc_update_flag = false;
 
 static void command_parsing(const String cmd_buf)
 {
@@ -79,27 +83,55 @@ static void command_parsing(const String cmd_buf)
 
 }
 
-static void clear_command_desc()
+static void clear_command_desc(LED_COMMAND_DESCRIPTION *p_command_desc_first)
 {
+    int command_num = 0;
     LED_COMMAND_DESCRIPTION *command_desc_next;
-    LED_COMMAND_DESCRIPTION *command_desc_tmp = command_desc_first;
+    LED_COMMAND_DESCRIPTION *command_desc_tmp = p_command_desc_first;
     while(command_desc_tmp != NULL){
         command_desc_next = (LED_COMMAND_DESCRIPTION*)(command_desc_tmp->qe_next);
         delete command_desc_tmp;
         command_desc_tmp = command_desc_next;
+        command_num++;
     }
-    command_desc_first = NULL;
-    command_desc_last = NULL;
-
-    Serial.println("All command list is cleared.");
+    Serial.printf("%d commands is cleared.\n", command_num);
 }
 
 void command_init()
 {
     command_buffer = "";
-    clear_command_desc();
+
+    command_desc[0] = NULL;
+    command_desc[1] = NULL;
+    current_display_description_id = 0;
+    command_desc_update_flag = false;
+    
     Serial.setTimeout(200);
 }
+
+static void update_command_desc(LED_COMMAND_DESCRIPTION *new_desc){
+    if(current_display_description_id == 0){
+        current_display_description_id = 1;
+    }
+    else{
+        current_display_description_id = 0;
+    }
+    command_desc[current_display_description_id] = new_desc;
+
+    command_desc_update_flag = true;
+    Serial.print("New command list is requested/");
+    while(command_desc_update_flag){vTaskDelay(200 / portTICK_PERIOD_MS);};
+    Serial.println("accepted");
+    if(current_display_description_id == 0){
+        clear_command_desc(command_desc[1]);
+        command_desc[1] = NULL;
+    }
+    else{
+        clear_command_desc(command_desc[0]);
+        command_desc[0] = NULL;
+    }
+}
+
 #define MAX_COMMAND_STRING  256
 void command_task(void *pvParameter)
 {
@@ -129,9 +161,9 @@ void command_task(void *pvParameter)
         // Serial.println("command parsing\n");
         command_parsing(command_buffer);
         
-        update_display_param(command_desc_first);
-        command_init();
-
+        update_command_desc(command_desc_first);
+        command_desc_first = NULL;
+        command_buffer = "";
         // Serial.flush();
     }
 }

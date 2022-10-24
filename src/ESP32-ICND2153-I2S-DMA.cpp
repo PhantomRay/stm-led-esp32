@@ -37,11 +37,11 @@ void ICND2153_I2S_DMA::showDMABuffer(bool wait_flag){
   new_frame_ready_flag = true;
   
   if(wait_flag){
-    Serial.println("framebuffer is locked");
+    // Serial.println("framebuffer is locked");
     unsigned long pass_tm, start_tm;
     start_tm = millis();
     while(!IsRelaseBuffer()){};
-    Serial.printf("framebuffer is released. locked time: %d\n", millis() - start_tm);
+    // Serial.printf("framebuffer is released. locked time: %d\n", millis() - start_tm);
   }
 
   // {
@@ -543,3 +543,4 @@ void ICND2153_I2S_DMA::load_test_screen()
   println("0123456789");
   println("~!@#$%^&*()-_+=|{}[]:;\"<>,.?/");
 }
+

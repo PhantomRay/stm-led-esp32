@@ -115,7 +115,7 @@ class ICND2153_I2S_DMA : public Adafruit_GFX {
     void drawPixelRGB888(int16_t x, int16_t y, uint8_t r, uint8_t g, uint8_t b);
     void drawPixelRGB24(int16_t x, int16_t y, RGB24 color);
     void drawIcon (int *ico, int16_t x, int16_t y, int16_t cols, int16_t rows);
-    
+    void drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove);
     // Color 444 is a 4 bit scale, so 0 to 15, color 565 takes a 0-255 bit value, so scale up by 255/15 (i.e. 17)!
     uint16_t color444(uint8_t r, uint8_t g, uint8_t b) { return color565(r*17,g*17,b*17); }
 
