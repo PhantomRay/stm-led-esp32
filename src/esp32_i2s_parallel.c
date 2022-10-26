@@ -36,33 +36,28 @@
 #include "esp32_i2s_parallel.h"
 
 typedef struct {
-    volatile lldesc_t *dmadesc_a, *dmadesc_b;
-    int desccount_a, desccount_b;
+  volatile lldesc_t *dmadesc_a, *dmadesc_b;
+  int desccount_a, desccount_b;
 } i2s_parallel_state_t;
 
-static i2s_parallel_state_t *i2s_state[2]={NULL, NULL};
+static i2s_parallel_state_t *i2s_state[2] = {NULL, NULL};
 
 callback shiftCompleteCallback;
 
-void setShiftCompleteCallback(callback f) {
-    shiftCompleteCallback = f;
-}
+void setShiftCompleteCallback(callback f) { shiftCompleteCallback = f; }
 
 volatile bool previousBufferFree = true;
 
-static int i2snum(i2s_dev_t *dev) {
-    return (dev==&I2S0)?0:1;
-}
+static int i2snum(i2s_dev_t *dev) { return (dev == &I2S0) ? 0 : 1; }
 
 // Todo: handle IS20? (this is hard coded for I2S1 only)
-static void IRAM_ATTR i2s_isr(void* arg) {
-    REG_WRITE(I2S_INT_CLR_REG(1), (REG_READ(I2S_INT_RAW_REG(1)) & 0xffffffc0) | 0x3f);
+static void IRAM_ATTR i2s_isr(void *arg) {
+  REG_WRITE(I2S_INT_CLR_REG(1), (REG_READ(I2S_INT_RAW_REG(1)) & 0xffffffc0) | 0x3f);
 
-    // at this point, the previously active buffer is free, go ahead and write to it
-    previousBufferFree = true;
+  // at this point, the previously active buffer is free, go ahead and write to it
+  previousBufferFree = true;
 
-    if(shiftCompleteCallback)
-        shiftCompleteCallback();
+  if (shiftCompleteCallback) shiftCompleteCallback();
 }
 /*
 //Calculate the amount of dma descs needed for a buffer desc
@@ -107,22 +102,20 @@ static void fill_dma_desc(volatile lldesc_t *dmadesc, i2s_parallel_buffer_desc_t
 
 // size must be less than DMA_MAX - need to handle breaking long transfer into two descriptors before call
 // DMA_MAX by the way is the maximum data packet size you can hold in one chunk
-void link_dma_desc(volatile lldesc_t *dmadesc, volatile lldesc_t *prevdmadesc, void *memory, size_t size) 
-{
-    if(size > DMA_MAX) size = DMA_MAX;
+void link_dma_desc(volatile lldesc_t *dmadesc, volatile lldesc_t *prevdmadesc, void *memory, size_t size) {
+  if (size > DMA_MAX) size = DMA_MAX;
 
-    dmadesc->size = size;
-    dmadesc->length = size;
-    dmadesc->buf = memory;
-    dmadesc->eof = 0;
-    dmadesc->sosf = 0;
-    dmadesc->owner = 1;
-    dmadesc->qe.stqe_next = 0;  // will need to set this elsewhere
-    dmadesc->offset = 0;
+  dmadesc->size         = size;
+  dmadesc->length       = size;
+  dmadesc->buf          = memory;
+  dmadesc->eof          = 0;
+  dmadesc->sosf         = 0;
+  dmadesc->owner        = 1;
+  dmadesc->qe.stqe_next = 0; // will need to set this elsewhere
+  dmadesc->offset       = 0;
 
-    // link previous to current
-    if(prevdmadesc)
-        prevdmadesc->qe.stqe_next = (lldesc_t*)dmadesc;
+  // link previous to current
+  if (prevdmadesc) prevdmadesc->qe.stqe_next = (lldesc_t *)dmadesc;
 }
 
 static void gpio_setup_out(int gpio, int sig) {
