@@ -100,8 +100,6 @@ bool ICND2153_I2S_DMA::begin() {
   configureDMA(PIN_R1, PIN_G1, PIN_B1, PIN_R2, PIN_G2, PIN_B2, PIN_A, PIN_B, PIN_C, PIN_LAT, PIN_OE,
                PIN_CLK); // DMA and I2S configuration and setup
 
-  // showDMABuffer(); // show backbuf_id of 0
-
 #if SERIAL_DEBUG
   if (!everything_OK) Serial.println("ICND2153_I2S_DMA::begin() failed.");
 #endif
@@ -109,6 +107,7 @@ bool ICND2153_I2S_DMA::begin() {
   /*register callback*/
   setShiftCompleteCallback(i2s_isr_cb);
 
+  showDMABuffer(true);
   return everything_OK;
 }
 
