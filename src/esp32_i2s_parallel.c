@@ -32,7 +32,7 @@
 #include "soc/gpio_periph.h"
 #include "driver/gpio.h"
 
-//#include "esp_heap_caps.h"
+// #include "esp_heap_caps.h"
 #include "esp32_i2s_parallel.h"
 
 typedef struct {

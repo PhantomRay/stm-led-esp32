@@ -10,7 +10,7 @@
 |--------|---------------------|---------------------|-----------------------
 | CL     |   clear             |  None               |   CL
 | BR     |   brightness        |  0~100              |   BR:60
-| F      |   font type         |  font type          |   F:FreeMono9pt7b
+| FT      |   font type        |  font type          |   FT:FreeMono9pt7b
 | S      |   font size         |  size               |   S:2
 | BG     |   background clor   |  red,green,blue     |   BG:255,0,0
 | TC     |   text color        |  red,green,blue     |   TC:0,0,255

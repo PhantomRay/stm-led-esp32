@@ -8,7 +8,7 @@
 
 // command_type_num = sizeof(command_type) / sizeof(command_type[0]);
 #define COMMAND_TYPE_NUM 11
-const String command_type[COMMAND_TYPE_NUM] = {"CL", "BR", "F", "S", "BG", "TC", "CR", "P", "I", "D", "FL"};
+const String command_type[COMMAND_TYPE_NUM] = {"CL", "BR", "FT", "S", "BG", "TC", "CR", "P", "I", "D", "FL"};
 String command_buffer = ""; // ="CL;F:font1;S:10;BG:255,0,0;TC:0,255,0;CR:10,20;P:\\HELLO, WORLD!\\;D:5000;CL\r";
 const char command_separate_char   = ';';
 const char parameter_separate_char = ':';
@@ -19,6 +19,7 @@ LED_COMMAND_DESCRIPTION *command_desc_last  = NULL;
 LED_COMMAND_DESCRIPTION *command_desc[2];
 uint8_t current_display_description_id = 0;
 volatile bool command_desc_update_flag = false;
+volatile bool command_desc_stop_flag   = false; // for FL command
 
 static void command_parsing(const String cmd_buf) {
   int start_pos = 0;
@@ -39,21 +40,25 @@ static void command_parsing(const String cmd_buf) {
     for (int i = 0; i < COMMAND_TYPE_NUM; i++) {
       cmd_type_pos = cmd_string.indexOf(command_type[i]);
       if (cmd_type_pos == 0) {
-        cmd_desc           = new LED_COMMAND_DESCRIPTION;
-        cmd_desc->cmd.type = command_type[i];
-        if (command_type[i] != "CL") {
-          cmd_parmeter_pos        = cmd_string.indexOf(parameter_separate_char);
-          cmd_desc->cmd.parameter = cmd_string.substring(cmd_parmeter_pos + 1, cmd_string.length());
+        if (command_type[i] == "FL") {
+          command_desc_stop_flag = true;
         } else {
-          cmd_desc->cmd.parameter = "";
-        }
-        cmd_desc->qe_next = NULL;
-        if (command_desc_first == NULL) {
-          command_desc_first = cmd_desc;
-          command_desc_last  = command_desc_first;
-        } else {
-          command_desc_last->qe_next = cmd_desc;
-          command_desc_last          = cmd_desc;
+          cmd_desc           = new LED_COMMAND_DESCRIPTION;
+          cmd_desc->cmd.type = command_type[i];
+          if (command_type[i] == "CL") {
+            cmd_desc->cmd.parameter = "";
+          } else {
+            cmd_parmeter_pos        = cmd_string.indexOf(parameter_separate_char);
+            cmd_desc->cmd.parameter = cmd_string.substring(cmd_parmeter_pos + 1, cmd_string.length());
+          }
+          cmd_desc->qe_next = NULL;
+          if (command_desc_first == NULL) {
+            command_desc_first = cmd_desc;
+            command_desc_last  = command_desc_first;
+          } else {
+            command_desc_last->qe_next = cmd_desc;
+            command_desc_last          = cmd_desc;
+          }
         }
         break;
       }
@@ -100,6 +105,7 @@ void command_init() {
   command_desc[1]                = NULL;
   current_display_description_id = 0;
   command_desc_update_flag       = false;
+  command_desc_stop_flag         = false;
 
   Serial.setTimeout(200);
 }
@@ -118,6 +124,8 @@ static void update_command_desc(LED_COMMAND_DESCRIPTION *new_desc) {
     vTaskDelay(200 / portTICK_PERIOD_MS);
   };
   Serial.println("accepted");
+
+  command_desc_stop_flag = false;
   if (current_display_description_id == 0) {
     clear_command_desc(command_desc[1]);
     command_desc[1] = NULL;

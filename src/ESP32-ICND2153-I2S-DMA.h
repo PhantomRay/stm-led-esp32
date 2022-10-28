@@ -55,7 +55,7 @@
 /* Keep this as is. Do not change.                                                     */
 #define ESP32_I2S_DMA_MODE I2S_PARALLEL_BITS_16 // Pump 16 bits out in parallel
 #define ESP32_I2S_DMA_STORAGE_TYPE uint16_t     // one uint16_t at a time.
-//#define ESP32_I2S_CLOCK_SPEED     (20000000UL)            // @ 20Mhz
+// #define ESP32_I2S_CLOCK_SPEED     (20000000UL)            // @ 20Mhz
 #define ESP32_I2S_CLOCK_SPEED (10000000UL) // @ 10Mhz
 #define CLKS_DURING_LATCH 0                // Not used.
 /***************************************************************************************/
@@ -198,10 +198,10 @@ private:
 
   uint8_t gclk_scale;
   uint8_t frame_scan_num;
-  uint16_t gclk_pulse_num_per_scan, dma_unit_num;
-  int header_length, colorbuffer_length, auxbuffer_length;
-  uint8_t colorbuffer_scan_num, auxbuffer_scan_num;
-  uint8_t colorbuffer_dma_descount, auxbuffer_dma_descount;
+  uint16_t gclk_pulse_num_per_scan, dma_unit_aux, dma_unit_color;
+  uint32_t header_length, colorbuffer_length, auxbuffer_length;
+  uint8_t colorbuffer_scan_num;
+  uint8_t colorbuffer_dma_descount;
   /* Calculate the memory available for DMA use, do some other stuff, and allocate accordingly */
   bool allocateDMAmemory();
   void clearDMAmemory();

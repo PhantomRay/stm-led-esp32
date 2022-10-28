@@ -72,13 +72,11 @@ bool ICND2153_I2S_DMA::begin() {
   }
   // extend dma buffer for real color region
   colorbuffer_length = colorbuffer_scan_num * gclk_pulse_num_per_scan;
-  auxbuffer_scan_num = frame_scan_num - colorbuffer_scan_num;
   auxbuffer_length   = gclk_pulse_num_per_scan + (4 * gclk_scale);
 
   // number of LL description
-  dma_unit_num             = gclk_pulse_num_per_scan >> 1; // because gclk_pulse_num_per_scan * sizeof(uint16_t) > 4092
-  colorbuffer_dma_descount = colorbuffer_scan_num * 2;     // this is same as (colorbuffer_length / dma_unit_num)
-  auxbuffer_dma_descount   = auxbuffer_scan_num * 2;
+  dma_unit_color = 2040;                         //(sizeof(uint16_t) * dma_unit_color) must be less than 4092
+  dma_unit_aux   = gclk_pulse_num_per_scan >> 1; // because gclk_pulse_num_per_scan * sizeof(uint16_t) > 4092
 
   everything_OK            = false;
   double_buffering_enabled = false;
@@ -134,10 +132,10 @@ uint8_t val2PWM(int val) {
 // }
 uint16_t ICND2153_I2S_DMA::ValueAt_t(int double_row, int column) {
   uint16_t offset;
-  uint8_t row_id, row_rem, col_id, col_rem;
-  uint8_t panel_num = PANEL_CHAIN; // the number of chain
-  uint8_t panel_id  = column / 64;
-  column            = column % 64;
+  uint16_t row_id, row_rem, col_id, col_rem;
+  uint16_t panel_num = PANEL_CHAIN; // the number of chain
+  uint16_t panel_id  = column / 64;
+  column             = column % 64;
 
   row_id  = double_row % 8;
   row_rem = (double_row < 8) ? 1 : 0;
@@ -272,15 +270,19 @@ bool ICND2153_I2S_DMA::allocateDMAmemory() {
    * Step 2: Allocate memory for DMA linked list, linking up each framebuffer in sequence for GPIO output.
    */
   {
-    // 1 is for header of frame(Vsync), frame_scan_num * 2 = colorbuffer_dma_descount + auxbuffer_dma_descount, and
-    // double
-    desccount_a = (colorbuffer_dma_descount + 1) * 2; //(frame_scan_num * 2 + 1)*2;
-    dmadesc_a   = (lldesc_t *)heap_caps_malloc(desccount_a * sizeof(lldesc_t), MALLOC_CAP_DMA);
+    // 1 is for header of frame(Vsync),
+    // color buffer DMA descriptions
+    colorbuffer_dma_descount = colorbuffer_length / dma_unit_color + 1; //((colorbuffer_length % dma_unit_color)?1:0);
+    desccount_a              = (colorbuffer_dma_descount + 1) * 2;
+    dmadesc_a                = (lldesc_t *)heap_caps_malloc(desccount_a * sizeof(lldesc_t), MALLOC_CAP_DMA);
 
+    // auxiliary buffer DMA descriptions
     desccount_b = frame_scan_num * 2 + 1;
     dmadesc_b   = (lldesc_t *)heap_caps_malloc(desccount_b * sizeof(lldesc_t), MALLOC_CAP_DMA);
 
     size_t _dma_linked_list_memory_required = (desccount_a + desccount_b) * sizeof(lldesc_t);
+
+    Serial.printf("unit-%d, color desc-%d, aux desc-%d\n", sizeof(lldesc_t), desccount_a, desccount_b);
   }
 
   // Just os we know
@@ -305,19 +307,24 @@ void ICND2153_I2S_DMA::configureDMA(int r1_pin, int g1_pin, int b1_pin, int r2_p
     previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
     current_dmadescriptor_offset++;
     uint16_t *pbuf = gpioplane_buffer[0];
-    for (int scan_id = 0; scan_id < colorbuffer_dma_descount; scan_id++) {
+    for (int scan_id = 0; scan_id < colorbuffer_dma_descount - 1; scan_id++) {
       link_dma_desc(&dmadesc_a[current_dmadescriptor_offset], previous_dmadesc_a, pbuf,
-                    sizeof(uint16_t) * dma_unit_num);
+                    sizeof(uint16_t) * dma_unit_color);
       previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
       current_dmadescriptor_offset++;
-      pbuf += dma_unit_num;
+      pbuf += dma_unit_color;
     }
+    uint16_t remain_elements = colorbuffer_length - ((colorbuffer_dma_descount - 1) * dma_unit_color);
+    link_dma_desc(&dmadesc_a[current_dmadescriptor_offset], previous_dmadesc_a, pbuf,
+                  sizeof(uint16_t) * remain_elements);
+    previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
+    current_dmadescriptor_offset++;
     /*use following code when desccount_a = (frame_scan_num * 2 + 1)*2;*/
     // for(int scan_id = 0; scan_id < auxbuffer_dma_descount/2; scan_id++) {
     //   link_dma_desc(&dmadesc_a[current_dmadescriptor_offset], previous_dmadesc_a, aux_buffer, sizeof(uint16_t) *
-    //   dma_unit_num); previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset]; current_dmadescriptor_offset++;
-    //   link_dma_desc(&dmadesc_a[current_dmadescriptor_offset], previous_dmadesc_a, &aux_buffer[dma_unit_num],
-    //   sizeof(uint16_t) * dma_unit_num); previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
+    //   dma_unit_aux); previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset]; current_dmadescriptor_offset++;
+    //   link_dma_desc(&dmadesc_a[current_dmadescriptor_offset], previous_dmadesc_a, &aux_buffer[dma_unit_aux],
+    //   sizeof(uint16_t) * dma_unit_aux); previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
     //   current_dmadescriptor_offset++;
     // }
   }
@@ -336,11 +343,11 @@ void ICND2153_I2S_DMA::configureDMA(int r1_pin, int g1_pin, int b1_pin, int r2_p
   current_dmadescriptor_offset++;
   for (int scan_id = 0; scan_id < frame_scan_num; scan_id++) {
     link_dma_desc(&dmadesc_b[current_dmadescriptor_offset], previous_dmadesc_b, aux_buffer,
-                  sizeof(uint16_t) * dma_unit_num);
+                  sizeof(uint16_t) * dma_unit_aux);
     previous_dmadesc_b = &dmadesc_b[current_dmadescriptor_offset];
     current_dmadescriptor_offset++;
-    link_dma_desc(&dmadesc_b[current_dmadescriptor_offset], previous_dmadesc_b, &aux_buffer[dma_unit_num],
-                  sizeof(uint16_t) * dma_unit_num);
+    link_dma_desc(&dmadesc_b[current_dmadescriptor_offset], previous_dmadesc_b, &aux_buffer[dma_unit_aux],
+                  sizeof(uint16_t) * dma_unit_aux);
     previous_dmadesc_b = &dmadesc_b[current_dmadescriptor_offset];
     current_dmadescriptor_offset++;
   }
@@ -464,26 +471,39 @@ void ICND2153_I2S_DMA::updateMatrixDMABuffer(uint8_t r, uint8_t g, uint8_t b) {
 
 } // updateMatrixDMABuffer (full frame paint)
 
-// uint32_t ICND2153_I2S_DMA::pixel_mapper(uint8_t x, uint8_t y){
-//   uint16_t matrix_x, matrix_y;
-//   MapVisibleToMatrix(x, y, &matrix_x, &matrix_y);
-//   if(matrix_y > ROWS_PER_FRAME){
-
-//   }
-// }
-
 /*--- pixel mapper ---*/
 void ICND2153_I2S_DMA::MapVisibleToMatrix(uint16_t x, uint16_t y, uint16_t *matrix_x, uint16_t *matrix_y) {
+#if (PANEL_CHAIN == 3)
   //  ___       ___       ___
   // | O |  -< | O |  -< | O |
   // | ^ |  |  | ^ |  |  | ^ |
   // | I | <-  | I | <-  | I |}- Board connector(HUB75)
   //  ---       ---       ---
   uint16_t x_new, y_new;
-  y_new     = (PANEL_HEIGHT - 1) - (x % PANEL_HEIGHT); // rows = 32
+  y_new     = (PANEL_HEIGHT - 1) - (x % PANEL_HEIGHT);
   x_new     = (x / PANEL_HEIGHT) * PANEL_WIDTH + y;
   *matrix_x = x_new;
   *matrix_y = y_new;
+#endif
+
+#if (PANEL_CHAIN == 6)
+  //  ___       ___       ___
+  // | O |  -< | O |  -< | O |
+  // | ^ |  |  | ^ |  |  | ^ |
+  // | I |  |  | I |  |  | I |
+  //  ---   |   ---   |   ---
+  //   ^    |    ^    |    ^
+  //  ___   |   ___   |   ___
+  // | O |  |  | O |  |  | O |
+  // | ^ |  |  | ^ |  |  | ^ |
+  // | I | <-  | I | <-  | I |}- Board connector(HUB75)
+  //  ---       ---       ---
+  uint16_t x_new, y_new;
+  y_new     = (PANEL_HEIGHT - 1) - (x % PANEL_HEIGHT);
+  x_new     = (x / PANEL_HEIGHT) * (PANEL_WIDTH * 2) + y;
+  *matrix_x = x_new;
+  *matrix_y = y_new;
+#endif
 }
 
 uint32_t mapping_tb[11][2] = {
@@ -510,38 +530,34 @@ void ICND2153_I2S_DMA::load_test_screen() {
   // updateMatrixDMABuffer(5, 5, 255, 0, 0);
 
   /* test line */
-  // int line_id = 0;
-  // uint16_t color;
-  // do{
-  //   color = color565(255, 0, 0);
-  //   drawLine(1, line_id, 94, line_id, color);
-  //   line_id += 2;
-  //   color = color565(0, 255, 0);
-  //   drawLine(1, line_id, 94, line_id, color);
-  //   line_id += 2;
-  //   color = color565(0, 0, 255);
-  //   drawLine(1, line_id, 94, line_id, color);
-  //   line_id += 2;
-  // }while(line_id < 60);
-  //   color = color565(255, 0, 0);
-  //   drawLine(1, line_id, 94, line_id, color);
-  //   line_id += 2;
-  //   color = color565(0, 255, 0);
-  //   drawLine(1, line_id, 94, line_id, color);
+  int line_id = 0;
+  uint16_t color[3];
+  color[0]     = color565(255, 0, 0);
+  color[1]     = color565(0, 255, 0);
+  color[2]     = color565(0, 0, 255);
+  int color_id = 0;
+  do {
+    drawLine(1, line_id, MATRIX_WIDTH - 2, line_id, color[color_id]);
+    line_id += 2;
+    color_id++;
+    if (color_id >= 3) {
+      color_id = 0;
+    }
+  } while (line_id < MATRIX_HEIGHT);
 
   /* test font */
-  setPanelBrightness(10);
-  setTextColor(color565(255, 0, 0));
-  setCursor(1, 0);
-  println("Hello World!");
-  // setFont(&FreeSansBold12pt7b);
-  // setTextSize(2);
-  setTextColor(color565(0, 255, 0));
-  println("ICND2153 Driver");
-  setTextColor(color565(0, 0, 255));
-  println("abcdefghijklmnop");
-  println("ABCDEFGHIJKLMNOP");
-  setTextColor(color565(128, 128, 128));
-  println("0123456789");
-  println("~!@#$%^&*()-_+=|{}[]:;\"<>,.?/");
+  // setPanelBrightness(10);
+  // setTextColor(color565(255, 0, 0));
+  // setCursor(1, 0);
+  // println("Hello World!");
+  // // setFont(&FreeSansBold12pt7b);
+  // // setTextSize(2);
+  // setTextColor(color565(0, 255, 0));
+  // println("ICND2153 Driver");
+  // setTextColor(color565(0, 0, 255));
+  // println("abcdefghijklmnop");
+  // println("ABCDEFGHIJKLMNOP");
+  // setTextColor(color565(128, 128, 128));
+  // println("0123456789");
+  // println("~!@#$%^&*()-_+=|{}[]:;\"<>,.?/");
 }
