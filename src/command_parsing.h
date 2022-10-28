@@ -15,7 +15,7 @@ typedef struct {
 
 extern LED_COMMAND_DESCRIPTION *command_desc[2];
 extern uint8_t current_display_description_id;
-extern bool command_desc_update_flag;
+extern volatile bool command_desc_update_flag;
 
 void command_init();
 void command_task(void *pvParameter);

@@ -22,10 +22,10 @@
 #define PANEL_WIDTH 64
 #define PANEL_HEIGHT 32
 #define DOUBLE_ROWS 16 //(PANEL_HEIGHT/2)
-#define PANEL_CHAIN 3
+#define PANEL_CHAIN 6
 
 #define MATRIX_WIDTH 96  /*Visible LED Matrix width*/
-#define MATRIX_HEIGHT 64 /*Visible LED Matrix height*/
+#define MATRIX_HEIGHT 128 /*Visible LED Matrix height*/
 
 // Panel Upper half RGB (numbering according to order in DMA gpio_bus configuration)
 #define BIT_R1 (1 << 0)
@@ -175,7 +175,8 @@ public:
   // ------- PRIVATE -------
 private:
   uint16_t *gpioplane_buffer[2];
-  uint16_t *bitplane_buffer[2];
+  uint32_t gpioplane_buffer_len[2];
+  
   uint16_t *aux_buffer;
   uint16_t *header_buffer;
 
@@ -198,16 +199,16 @@ private:
 
   uint8_t gclk_scale;
   uint8_t frame_scan_num;
-  uint16_t gclk_pulse_num_per_scan, dma_unit_num;
-  int header_length, colorbuffer_length, auxbuffer_length;
-  uint8_t colorbuffer_scan_num, auxbuffer_scan_num;
-  uint8_t colorbuffer_dma_descount, auxbuffer_dma_descount;
+  uint16_t gclk_pulse_num_per_scan, dma_unit_aux, dma_unit_color;
+  uint32_t header_length, colorbuffer_length, auxbuffer_length;
+  uint8_t colorbuffer_scan_num, colorbuffer_scan_num_sub[2];
+  uint8_t colorbuffer_dma_descount, colorbuffer_dma_descount_sub[2];
   /* Calculate the memory available for DMA use, do some other stuff, and allocate accordingly */
   bool allocateDMAmemory();
   void clearDMAmemory();
   // uint32_t ValueAt(int double_row, int column, int bit);
   uint16_t ValueAt_t(int double_row, int column);
-
+  void set_gpiobuffer(uint32_t offset, uint16_t mask, uint16_t color_bits);
   /* Setup the DMA Link List chain and initiate the ESP32 DMA engine */
   void configureDMA(int r1_pin, int g1_pin, int b1_pin, int r2_pin, int g2_pin, int b2_pin, int a_pin, int b_pin,
                     int c_pin, int lat_pin, int oe_pin, int clk_pin); // Get everything setup. Refer to the .c file
