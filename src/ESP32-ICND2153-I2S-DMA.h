@@ -24,7 +24,7 @@
 #define DOUBLE_ROWS 16 //(PANEL_HEIGHT/2)
 #define PANEL_CHAIN 6
 
-#define MATRIX_WIDTH 96  /*Visible LED Matrix width*/
+#define MATRIX_WIDTH 96   /*Visible LED Matrix width*/
 #define MATRIX_HEIGHT 128 /*Visible LED Matrix height*/
 
 // Panel Upper half RGB (numbering according to order in DMA gpio_bus configuration)
@@ -55,7 +55,7 @@
 /* Keep this as is. Do not change.                                                     */
 #define ESP32_I2S_DMA_MODE I2S_PARALLEL_BITS_16 // Pump 16 bits out in parallel
 #define ESP32_I2S_DMA_STORAGE_TYPE uint16_t     // one uint16_t at a time.
-//#define ESP32_I2S_CLOCK_SPEED     (20000000UL)            // @ 20Mhz
+// #define ESP32_I2S_CLOCK_SPEED     (20000000UL)            // @ 20Mhz
 #define ESP32_I2S_CLOCK_SPEED (10000000UL) // @ 10Mhz
 #define CLKS_DURING_LATCH 0                // Not used.
 /***************************************************************************************/
@@ -176,7 +176,7 @@ public:
 private:
   uint16_t *gpioplane_buffer[2];
   uint32_t gpioplane_buffer_len[2];
-  
+
   uint16_t *aux_buffer;
   uint16_t *header_buffer;
 

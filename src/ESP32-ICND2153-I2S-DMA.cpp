@@ -75,7 +75,7 @@ bool ICND2153_I2S_DMA::begin() {
   auxbuffer_length   = gclk_pulse_num_per_scan + (4 * gclk_scale);
 
   // number of LL description
-  dma_unit_color = 2040;  //(sizeof(uint16_t) * dma_unit_color) must be less than 4092
+  dma_unit_color = 2040;                         //(sizeof(uint16_t) * dma_unit_color) must be less than 4092
   dma_unit_aux   = gclk_pulse_num_per_scan >> 1; // because gclk_pulse_num_per_scan * sizeof(uint16_t) > 4092
 
   everything_OK            = false;
@@ -105,8 +105,7 @@ bool ICND2153_I2S_DMA::begin() {
   /*register callback*/
   setShiftCompleteCallback(i2s_isr_cb);
 
-  showDMABuffer(true); // show backbuf_id of 0
-
+  showDMABuffer(true);
   return everything_OK;
 }
 
@@ -136,7 +135,7 @@ uint16_t ICND2153_I2S_DMA::ValueAt_t(int double_row, int column) {
   uint16_t row_id, row_rem, col_id, col_rem;
   uint16_t panel_num = PANEL_CHAIN; // the number of chain
   uint16_t panel_id  = column / 64;
-  column            = column % 64;
+  column             = column % 64;
 
   row_id  = double_row % 8;
   row_rem = (double_row < 8) ? 1 : 0;
@@ -146,12 +145,11 @@ uint16_t ICND2153_I2S_DMA::ValueAt_t(int double_row, int column) {
   return offset;
 }
 
-void ICND2153_I2S_DMA::set_gpiobuffer(uint32_t offset, uint16_t mask, uint16_t color_bits){
+void ICND2153_I2S_DMA::set_gpiobuffer(uint32_t offset, uint16_t mask, uint16_t color_bits) {
   uint16_t *pbuf;
-  if(offset < gpioplane_buffer_len[0]){
+  if (offset < gpioplane_buffer_len[0]) {
     pbuf = gpioplane_buffer[0];
-  }
-  else{
+  } else {
     pbuf = gpioplane_buffer[1];
     offset -= gpioplane_buffer_len[0];
   }
@@ -180,7 +178,7 @@ void ICND2153_I2S_DMA::clearDMAmemory() {
   }
 
   uint16_t *pbuf0;
-  for(uint8_t buf_id = 0; buf_id < 2; buf_id++){
+  for (uint8_t buf_id = 0; buf_id < 2; buf_id++) {
     pbuf0 = gpioplane_buffer[buf_id];
     for (uint8_t scan_frame = 0; scan_frame < colorbuffer_scan_num_sub[buf_id]; scan_frame++) {
       for (uint8_t scan_line = 0; scan_line < 8; scan_line++) {
@@ -196,7 +194,7 @@ void ICND2153_I2S_DMA::clearDMAmemory() {
   uint32_t pixel_pos;
   for (int y = 0; y < 8; ++y) {
     for (int x = 64 * PANEL_CHAIN - 16; x < 64 * PANEL_CHAIN; ++x) {
-      pixel_pos = ((uint32_t)ValueAt_t(y, x) << 4) + 14;      
+      pixel_pos = ((uint32_t)ValueAt_t(y, x) << 4) + 14;
       set_gpiobuffer(pixel_pos, 0, BIT_LAT);
     }
   }
@@ -251,12 +249,13 @@ bool ICND2153_I2S_DMA::allocateDMAmemory() {
       return false;
     }
 
-    /*It cannot malloc a large color buffer for 6 panels. The color buffer size of 3 panels about 98KBytes. So separate into several parts*/
-    colorbuffer_scan_num_sub[0] = colorbuffer_scan_num >> 1;
-    colorbuffer_scan_num_sub[1] = colorbuffer_scan_num - colorbuffer_scan_num_sub[0];
-    gpioplane_buffer_len[0] = colorbuffer_scan_num_sub[0] * gclk_pulse_num_per_scan;
+    /*It cannot malloc a large color buffer for 6 panels. The color buffer size of 3 panels about 98KBytes. So separate
+     * into several parts*/
+    colorbuffer_scan_num_sub[0]     = colorbuffer_scan_num >> 1;
+    colorbuffer_scan_num_sub[1]     = colorbuffer_scan_num - colorbuffer_scan_num_sub[0];
+    gpioplane_buffer_len[0]         = colorbuffer_scan_num_sub[0] * gclk_pulse_num_per_scan;
     colorbuffer_dma_descount_sub[0] = gpioplane_buffer_len[0] / dma_unit_color + 1;
-    gpioplane_buffer_len[1] = colorbuffer_scan_num_sub[1] * gclk_pulse_num_per_scan;
+    gpioplane_buffer_len[1]         = colorbuffer_scan_num_sub[1] * gclk_pulse_num_per_scan;
     colorbuffer_dma_descount_sub[1] = gpioplane_buffer_len[1] / dma_unit_color + 1;
     gpioplane_buffer[0] = (uint16_t *)heap_caps_malloc((sizeof(uint16_t) * gpioplane_buffer_len[0]), MALLOC_CAP_DMA);
     if (gpioplane_buffer[0] == NULL) {
@@ -292,17 +291,17 @@ bool ICND2153_I2S_DMA::allocateDMAmemory() {
    */
   {
     // 1 is for header of frame(Vsync),
-    //color buffer DMA descriptions
+    // color buffer DMA descriptions
     colorbuffer_dma_descount = colorbuffer_dma_descount_sub[0] + colorbuffer_dma_descount_sub[1];
-    desccount_a = (colorbuffer_dma_descount + 1) * 2;
-    dmadesc_a   = (lldesc_t *)heap_caps_malloc(desccount_a * sizeof(lldesc_t), MALLOC_CAP_DMA);
+    desccount_a              = (colorbuffer_dma_descount + 1) * 2;
+    dmadesc_a                = (lldesc_t *)heap_caps_malloc(desccount_a * sizeof(lldesc_t), MALLOC_CAP_DMA);
 
-    //auxiliary buffer DMA descriptions
+    // auxiliary buffer DMA descriptions
     desccount_b = frame_scan_num * 2 + 1;
     dmadesc_b   = (lldesc_t *)heap_caps_malloc(desccount_b * sizeof(lldesc_t), MALLOC_CAP_DMA);
 
     size_t _dma_linked_list_memory_required = (desccount_a + desccount_b) * sizeof(lldesc_t);
-    
+
     Serial.printf("unit-%d, color desc-%d, aux desc-%d\n", sizeof(lldesc_t), desccount_a, desccount_b);
   }
 
@@ -328,32 +327,32 @@ void ICND2153_I2S_DMA::configureDMA(int r1_pin, int g1_pin, int b1_pin, int r2_p
     previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
     current_dmadescriptor_offset++;
     uint16_t *pbuf = gpioplane_buffer[0];
-    for (int scan_id = 0; scan_id < colorbuffer_dma_descount_sub[0]-1; scan_id++) {
+    for (int scan_id = 0; scan_id < colorbuffer_dma_descount_sub[0] - 1; scan_id++) {
       link_dma_desc(&dmadesc_a[current_dmadescriptor_offset], previous_dmadesc_a, pbuf,
                     sizeof(uint16_t) * dma_unit_color);
       previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
       current_dmadescriptor_offset++;
       pbuf += dma_unit_color;
     }
-      uint16_t remain_elements = gpioplane_buffer_len[0] - ((colorbuffer_dma_descount_sub[0] - 1) * dma_unit_color);
-      link_dma_desc(&dmadesc_a[current_dmadescriptor_offset], previous_dmadesc_a, pbuf,
-                    sizeof(uint16_t) * remain_elements);
-      previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
-      current_dmadescriptor_offset++;
+    uint16_t remain_elements = gpioplane_buffer_len[0] - ((colorbuffer_dma_descount_sub[0] - 1) * dma_unit_color);
+    link_dma_desc(&dmadesc_a[current_dmadescriptor_offset], previous_dmadesc_a, pbuf,
+                  sizeof(uint16_t) * remain_elements);
+    previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
+    current_dmadescriptor_offset++;
 
     pbuf = gpioplane_buffer[1];
-    for (int scan_id = 0; scan_id < colorbuffer_dma_descount_sub[1]-1; scan_id++) {
+    for (int scan_id = 0; scan_id < colorbuffer_dma_descount_sub[1] - 1; scan_id++) {
       link_dma_desc(&dmadesc_a[current_dmadescriptor_offset], previous_dmadesc_a, pbuf,
                     sizeof(uint16_t) * dma_unit_color);
       previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
       current_dmadescriptor_offset++;
       pbuf += dma_unit_color;
     }
-      remain_elements = gpioplane_buffer_len[1] - ((colorbuffer_dma_descount_sub[1] - 1) * dma_unit_color);
-      link_dma_desc(&dmadesc_a[current_dmadescriptor_offset], previous_dmadesc_a, pbuf,
-                    sizeof(uint16_t) * remain_elements);
-      previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
-      current_dmadescriptor_offset++;
+    remain_elements = gpioplane_buffer_len[1] - ((colorbuffer_dma_descount_sub[1] - 1) * dma_unit_color);
+    link_dma_desc(&dmadesc_a[current_dmadescriptor_offset], previous_dmadesc_a, pbuf,
+                  sizeof(uint16_t) * remain_elements);
+    previous_dmadesc_a = &dmadesc_a[current_dmadescriptor_offset];
+    current_dmadescriptor_offset++;
 
     /*use following code when desccount_a = (frame_scan_num * 2 + 1)*2;*/
     // for(int scan_id = 0; scan_id < auxbuffer_dma_descount/2; scan_id++) {
@@ -468,10 +467,10 @@ void ICND2153_I2S_DMA::updateMatrixDMABuffer(int16_t x_coord, int16_t y_coord, u
     if (green & mask) color_bits |= g_bits;
     if (blue & mask) color_bits |= b_bits;
 
-    if (i % 2) {      
-      set_gpiobuffer(offset+i-1, designator_mask, color_bits);
+    if (i % 2) {
+      set_gpiobuffer(offset + i - 1, designator_mask, color_bits);
     } else {
-      set_gpiobuffer(offset+i+1, designator_mask, color_bits);
+      set_gpiobuffer(offset + i + 1, designator_mask, color_bits);
     }
   }
 
@@ -491,49 +490,49 @@ void ICND2153_I2S_DMA::updateMatrixDMABuffer(uint8_t r, uint8_t g, uint8_t b) {
     if (green & mask) color_bits |= BIT_G12;
     if (blue & mask) color_bits |= BIT_B12;
     if (i % 2) {
-      color_buffer[i-1] = color_bits;
+      color_buffer[i - 1] = color_bits;
     } else {
-      color_buffer[i+1] = color_bits;
+      color_buffer[i + 1] = color_bits;
     }
   }
 
   uint16_t bit_id = 0;
-  uint32_t pixel = 0;
-  uint16_t *pbuf = gpioplane_buffer[0];
-  uint32_t len = gpioplane_buffer_len[0];
-  do{
-    for(bit_id = 0; bit_id < 16; bit_id++){
+  uint32_t pixel  = 0;
+  uint16_t *pbuf  = gpioplane_buffer[0];
+  uint32_t len    = gpioplane_buffer_len[0];
+  do {
+    for (bit_id = 0; bit_id < 16; bit_id++) {
       pbuf[bit_id] = (pbuf[bit_id] & (~BIT_COLOR)) | color_buffer[bit_id];
     }
     pbuf += 16;
     len -= 16;
     pixel++;
-  }while(len >= 16);
+  } while (len >= 16);
   // Serial.printf("buffer0 pixel:%d, rem:%d\n", pixel, len);
-  if(len != 0){
+  if (len != 0) {
     Serial.println("buffer0 fragment");
   }
 
   pbuf = gpioplane_buffer[1];
-  len = gpioplane_buffer_len[1];
-  do{
-    for(bit_id = 0; bit_id < 16; bit_id++){
+  len  = gpioplane_buffer_len[1];
+  do {
+    for (bit_id = 0; bit_id < 16; bit_id++) {
       pbuf[bit_id] = (pbuf[bit_id] & (~BIT_COLOR)) | color_buffer[bit_id];
     }
     pbuf += 16;
     len -= 16;
     pixel++;
-    if(pixel >= (PANEL_WIDTH * DOUBLE_ROWS * PANEL_CHAIN)){
+    if (pixel >= (PANEL_WIDTH * DOUBLE_ROWS * PANEL_CHAIN)) {
       break;
     }
-  }while(len >= 16);
+  } while (len >= 16);
   // Serial.printf("buffer0 pixel:%d, rem:%d\n", pixel, len);
-  
+
 } // updateMatrixDMABuffer (full frame paint)
 
 /*--- pixel mapper ---*/
 void ICND2153_I2S_DMA::MapVisibleToMatrix(uint16_t x, uint16_t y, uint16_t *matrix_x, uint16_t *matrix_y) {
-  #if (PANEL_CHAIN == 3)
+#if (PANEL_CHAIN == 3)
   //  ___       ___       ___
   // | O |  -< | O |  -< | O |
   // | ^ |  |  | ^ |  |  | ^ |
@@ -544,9 +543,9 @@ void ICND2153_I2S_DMA::MapVisibleToMatrix(uint16_t x, uint16_t y, uint16_t *matr
   x_new     = (x / PANEL_HEIGHT) * PANEL_WIDTH + y;
   *matrix_x = x_new;
   *matrix_y = y_new;
-  #endif
+#endif
 
-  #if (PANEL_CHAIN == 6)
+#if (PANEL_CHAIN == 6)
   //  ___       ___       ___
   // | O |  -< | O |  -< | O |
   // | ^ |  |  | ^ |  |  | ^ |
@@ -563,7 +562,7 @@ void ICND2153_I2S_DMA::MapVisibleToMatrix(uint16_t x, uint16_t y, uint16_t *matr
   x_new     = (x / PANEL_HEIGHT) * (PANEL_WIDTH * 2) + y;
   *matrix_x = x_new;
   *matrix_y = y_new;
-  #endif
+#endif
 }
 
 uint32_t mapping_tb[11][2] = {
@@ -592,18 +591,18 @@ void ICND2153_I2S_DMA::load_test_screen() {
   /* test line */
   int line_id = 0;
   uint16_t color[3];
-  color[0] = color565(255, 0, 0);
-  color[1] = color565(0, 255, 0);
-  color[2] = color565(0, 0, 255);
+  color[0]     = color565(255, 0, 0);
+  color[1]     = color565(0, 255, 0);
+  color[2]     = color565(0, 0, 255);
   int color_id = 0;
-  do{
+  do {
     drawLine(1, line_id, MATRIX_WIDTH - 2, line_id, color[color_id]);
     line_id += 2;
     color_id++;
-    if(color_id >= 3){
+    if (color_id >= 3) {
       color_id = 0;
     }
-  }while(line_id < MATRIX_HEIGHT);
+  } while (line_id < MATRIX_HEIGHT);
 
   /* test font */
   // setPanelBrightness(10);

@@ -9,11 +9,8 @@
 #include <Fonts/FreeSerif9pt7b.h>
 #include <Fonts/FreeSerif12pt7b.h>
 
-LED_COMMAND_DESCRIPTION *display_command = NULL;
-
 void display_init() {
   led_matrix.begin();
-  display_command = NULL;
   command_init();
 }
 
@@ -169,7 +166,14 @@ static void drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) {
   if (!goodBmp) Serial.println(F("BMP format not recognized."));
 }
 
-void update_display_param(LED_COMMAND_DESCRIPTION *cmd_desc_first) {
+void display_task() {
+  while (!command_desc_update_flag) {
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+  }
+
+  LED_COMMAND_DESCRIPTION *cmd_desc_first = command_desc[current_display_description_id];
+  command_desc_update_flag                = false;
+
   LED_COMMAND_DESCRIPTION *command_desc_tmp = cmd_desc_first;
   String cmd_type;
   String cmd_parm;
@@ -187,7 +191,7 @@ void update_display_param(LED_COMMAND_DESCRIPTION *cmd_desc_first) {
       } else {
         Serial.println("Brightness is less than 100.");
       }
-    } else if (cmd_type == "F") {
+    } else if (cmd_type == "FT") {
       if (cmd_parm == "default") {
         led_matrix.setFont();
       } else if (cmd_parm == "FreeMono9pt7b") {
@@ -237,10 +241,19 @@ void update_display_param(LED_COMMAND_DESCRIPTION *cmd_desc_first) {
       drawBmpFromFile(cmd_parm, x, y);
     } else if (cmd_type == "D") {
       led_matrix.showDMABuffer(true);
-      vTaskDelay(cmd_parm.toInt() / portTICK_PERIOD_MS); // delay(cmd_parm.toInt());
-    } else if (cmd_type == "FL") {
+      int delay_tm = cmd_parm.toInt();
+      do {
+        /*for FL command*/
+        if ((command_desc_update_flag == true) && (command_desc_stop_flag == true)) {
+          break;
+        }
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        delay_tm -= 100;
+      } while (delay_tm > 100);
     }
 
     command_desc_tmp = (LED_COMMAND_DESCRIPTION *)(command_desc_tmp->qe_next);
   }
+  /*for a command list without D command - ex:"CL;P:Hello;"*/
+  led_matrix.showDMABuffer(true);
 }
