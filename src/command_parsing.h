@@ -35,13 +35,13 @@ typedef struct {
   COLOR_DESC color;
 } Pixel_DESC;
 
-typedef struct {  
+typedef struct {
   POSITION_DESC pos;
   int16_t radius;
   COLOR_DESC color;
 } CIRCLE_DESC;
 
-typedef struct {  
+typedef struct {
   POSITION_DESC pos;
   int16_t width;
   int16_t height;

@@ -352,7 +352,7 @@ void display_task() {
         uint16_t color16 = led_matrix.color565(rect_par.color.r, rect_par.color.g, rect_par.color.b);
         led_matrix.fillRect(rect_par.pos.x, rect_par.pos.y, rect_par.width, rect_par.height, color16);
       }
-    } else if (cmd_type == "HP") { // draw a rectanger
+    } else if (cmd_type == "HP") { // get the width and height of a string
       int16_t x1, y1;
       uint16_t w, h;
       int16_t x = led_matrix.getCursorX();
@@ -446,5 +446,4 @@ void test_display_text() {
   led_matrix.println("DOWN");
   led_matrix.showDMABuffer(true);
   vTaskDelay(3000 / portTICK_PERIOD_MS);
-  
 }
