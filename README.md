@@ -35,6 +35,9 @@ CL;P:Hello;D:1000;CL;CR:10,20;P:World;D:2000;CL;
 CL;I:sample1_96x64.bmp;D:2000;CL;CR:10,20;TC:0,255,0;P:Hello,World;D:1000;CL;
 CL;CR:15,0;I:face2_96x64.bmp;D:3000;
 ```
+; Get the width and height of a string
+command - FT:FreeSerif12pt7b;HP:Hello
+result - x=?,y=?,x1=?,y1=?,w=?,h=? (w: width, h:height)
 
 ### Code formatting
 
