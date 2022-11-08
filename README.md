@@ -41,8 +41,11 @@ result - x=?,y=?,x1=?,y1=?,w=?,h=? (w: width, h:height)
 
 Caution:
 Users should be careful when fonts are changed.
-    bad command:        CL;FT:FreeSans12pt7b;PT:123     cursor_y < 0, error in PT command
-    correct command:    FT:FreeSans12pt7b;CL;PT:123     cursor_y = 0, no any error
+ex1:    bad command:        CL;FT:FreeSans12pt7b;PT:123     cursor_y < 0, error in PT command
+        correct command:    FT:FreeSans12pt7b;CL;PT:123     cursor_y = 0, no any error
+ex2:    AN;
+        FL;CL;CR:0,64;PT:12     cursor_y in "CR:0,64" is less than 63, it happens error.(https://learn.adafruit.com/adafruit-gfx-graphics-library/using-fonts)
+        
 
 ### Code formatting
 
