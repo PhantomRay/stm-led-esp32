@@ -39,6 +39,11 @@ CL;CR:15,0;I:face2_96x64.bmp;D:3000;
 command - FT:FreeSerif12pt7b;HP:Hello
 result - x=?,y=?,x1=?,y1=?,w=?,h=? (w: width, h:height)
 
+Caution:
+Users should be careful when fonts are changed.
+    bad command:        CL;FT:FreeSans12pt7b;PT:123     cursor_y < 0, error in PT command
+    correct command:    FT:FreeSans12pt7b;CL;PT:123     cursor_y = 0, no any error
+
 ### Code formatting
 
 Instasll clang-format v14.0.0 or later.
