@@ -10,15 +10,19 @@
 |--------|---------------------|---------------------|-----------------------
 | CL     |   clear             |  None               |   CL
 | BR     |   brightness        |  0~100              |   BR:60
-| FT      |   font type        |  font type          |   FT:FreeMono9pt7b
-| S      |   font size         |  size               |   S:2
+| FT     |   font type         |  font type          |   FT:FreeMono9pt7b
+| SZ     |   font size         |  size               |   SZ:2
 | BG     |   background clor   |  red,green,blue     |   BG:255,0,0
 | TC     |   text color        |  red,green,blue     |   TC:0,0,255
 | CR     |   cursor            |  x,y                |   CR:10,20
-| P      |   a string to print |  string             |   P:Hello World
-| I      |   a image to load   |  image name         |   I:smile.bmp
+| PT     |   a string to print |  string             |   PT:Hello World
+| IM     |   a image to load   |  image name         |   IM:smile.bmp
+| CI     |   fill circle       |  x,y,radius,r,g,b   |   CI:x,y,radius,r,g,b
+| RT     |   fill rectangle    |  x,y,w,h,r,g,b      |   CI:x,y,width,height,r,g,b
 | FL     |   flush all command |  --                 |   FL
-| D      |   delay time        |  time ms            |   D:2000
+| HP     |  string information |  string             |   HP:46 or HP:SLOW
+| DL     |   delay time        |  time ms            |   DL:2000
+| AN     |   sample animation  |                     |   AN     //use for only 6panel
 
 
 Type of Fonts
