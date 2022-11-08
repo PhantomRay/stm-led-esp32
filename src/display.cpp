@@ -332,7 +332,6 @@ void display_task() {
         Serial.println("Err:Text Color");
       }
     } else if (cmd_type == "PT") { // print a string
-      uint8_t pos_xy[2];
       led_matrix.println(cmd_parm);
     } else if (cmd_type == "IM") { // load an image
       uint8_t x = led_matrix.getCursorX();
