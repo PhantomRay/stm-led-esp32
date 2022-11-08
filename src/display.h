@@ -5,5 +5,6 @@
 
 void display_init();
 void display_task();
+void test_display_text();
 
 #endif
