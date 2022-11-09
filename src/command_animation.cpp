@@ -30,7 +30,12 @@ String cmd_animation = "CR:0,16;IM:HappyFace_94x94.bmp";
 #define TEXT_FONT "FreeSerif14pt7b"
 #define SLOW_POS "9,59"
 #define DOWN_POS "5,88"
-#define CMD_ANIMATION_DESC_SZ 76
+
+// LED_COMMAND_DESCRIPTION flash_desc[]={
+
+// };
+
+#define CMD_ANIMATION_DESC_SZ 41
 LED_COMMAND_DESCRIPTION cmd_animation_desc[CMD_ANIMATION_DESC_SZ] = {
     //----------------------------
     // CL;DL:2000;FT:FreeSerif46pt7b;TC:0,255,0;CR:3,94;PT:37;DL:1000;
@@ -49,12 +54,8 @@ LED_COMMAND_DESCRIPTION cmd_animation_desc[CMD_ANIMATION_DESC_SZ] = {
     {{"IM", IMAGE1}, NULL},
     {{"DL", DELAY2}, NULL},
     //----------------------------
-    // CL;DL:2000;FT:FreeSerif46pt7b;TC:255,128,0;CR:3,94;PT:40;
-    // RT:82,0,14,14,255,128,0;RT:0,114,14,14,255,128,0;DL:1000;
-    // RT:82,0,14,14,0,0,0;RT:0,114,14,14,0,0,0;RT:0,0,14,14,255,128,0;RT:82,114,14,14,255,128,0;DL:1000;
-    // CL;CR:1,17;IM:NormalFace_94x94.bmp;
-    // RT:82,0,14,14,255,128,0;RT:0,114,14,14,255,128,0;DL:1000;
-    // RT:82,0,14,14,0,0,0;RT:0,114,14,14,0,0,0;RT:0,0,14,14,255,128,0;RT:82,114,14,14,255,128,0;DL:1000;
+    // CL;DL:2000;FT:FreeSerif46pt7b;TC:255,128,0;CR:3,94;PT:40;FS:1,1000;
+    // CL;CR:1,17;IM:NormalFace_94x94.bmp;FS:1,1000;
     {{"CL", ""}, NULL},
     {{"DL", DELAY1}, NULL},
 
@@ -62,36 +63,16 @@ LED_COMMAND_DESCRIPTION cmd_animation_desc[CMD_ANIMATION_DESC_SZ] = {
     {{"TC", "255,128,0"}, NULL},
     {{"CR", SPEED_POS2}, NULL},
     {{"PT", "40"}, NULL},
-    {{"RT", RECT2ON}, NULL},
-    {{"RT", RECT3ON}, NULL},
-    {{"DL", DELAY2}, NULL},
-    {{"RT", RECT2OFF}, NULL},
-    {{"RT", RECT3OFF}, NULL},
-    {{"RT", RECT1ON}, NULL},
-    {{"RT", RECT4ON}, NULL},
-    {{"DL", DELAY2}, NULL},
+    {{"FS", "1,1000"}, NULL},
 
     {{"CL", ""}, NULL},
     {{"CR", IMAGE_POS}, NULL},
     {{"IM", IMAGE2}, NULL},
-    {{"RT", RECT2ON}, NULL},
-    {{"RT", RECT3ON}, NULL},
-    {{"DL", DELAY2}, NULL},
-    {{"RT", RECT2OFF}, NULL},
-    {{"RT", RECT3OFF}, NULL},
-    {{"RT", RECT1ON}, NULL},
-    {{"RT", RECT4ON}, NULL},
-    {{"DL", DELAY2}, NULL},
+    {{"FS", "1,1000"}, NULL},
     //----------------------------
-    // CL;DL:2000;FT:FreeSerif46pt7b;TC:255,0,0;CR:3,94;PT:45;
-    // RT:82,0,14,14,255,128,0;RT:0,114,14,14,255,128,0;DL:1000;
-    // RT:82,0,14,14,0,0,0;RT:0,114,14,14,0,0,0;RT:0,0,14,14,255,128,0;RT:82,114,14,14,255,128,0;DL:1000;
-    // CL;CR:1,17;IM:SadFace_94x94.bmp;
-    // RT:82,0,14,14,255,128,0;RT:0,114,14,14,255,128,0;DL:1000;
-    // RT:82,0,14,14,0,0,0;RT:0,114,14,14,0,0,0;RT:0,0,14,14,255,128,0;RT:82,114,14,14,255,128,0;DL:1000;
-    // CL;FT:FreeSerif14pt7b;TC:255,0,0;CR:9,59;PT:SLOW;CR:5,88;PT:DOWN;
-    // RT:82,0,14,14,255,128,0;RT:0,114,14,14,255,128,0;DL:1000;
-    // RT:82,0,14,14,0,0,0;RT:0,114,14,14,0,0,0;RT:0,0,14,14,255,128,0;RT:82,114,14,14,255,128,0;DL:1000;
+    // CL;DL:2000;FT:FreeSerif46pt7b;TC:255,0,0;CR:3,94;PT:45;FS:1,1000;
+    // CL;CR:1,17;IM:SadFace_94x94.bmp;FS:1,1000;
+    // CL;FT:FreeSerif14pt7b;TC:255,0,0;CR:9,59;PT:SLOW;CR:5,88;PT:DOWN;FS:1,1000;
     {{"CL", ""}, NULL},
     {{"DL", DELAY1}, NULL},
 
@@ -99,26 +80,12 @@ LED_COMMAND_DESCRIPTION cmd_animation_desc[CMD_ANIMATION_DESC_SZ] = {
     {{"TC", "255,0,0"}, NULL},
     {{"CR", SPEED_POS2}, NULL},
     {{"PT", "45"}, NULL},
-    {{"RT", RECT2ON}, NULL},
-    {{"RT", RECT3ON}, NULL},
-    {{"DL", DELAY2}, NULL},
-    {{"RT", RECT2OFF}, NULL},
-    {{"RT", RECT3OFF}, NULL},
-    {{"RT", RECT1ON}, NULL},
-    {{"RT", RECT4ON}, NULL},
-    {{"DL", DELAY2}, NULL},
+    {{"FS", "1,1000"}, NULL},
 
     {{"CL", ""}, NULL},
     {{"CR", IMAGE_POS}, NULL},
     {{"IM", IMAGE3}, NULL},
-    {{"RT", RECT2ON}, NULL},
-    {{"RT", RECT3ON}, NULL},
-    {{"DL", DELAY2}, NULL},
-    {{"RT", RECT2OFF}, NULL},
-    {{"RT", RECT3OFF}, NULL},
-    {{"RT", RECT1ON}, NULL},
-    {{"RT", RECT4ON}, NULL},
-    {{"DL", DELAY2}, NULL},
+    {{"FS", "1,1000"}, NULL},
 
     {{"CL", ""}, NULL},
     {{"FT", TEXT_FONT}, NULL},
@@ -127,14 +94,7 @@ LED_COMMAND_DESCRIPTION cmd_animation_desc[CMD_ANIMATION_DESC_SZ] = {
     {{"PT", "SLOW"}, NULL},
     {{"CR", DOWN_POS}, NULL},
     {{"PT", "DOWN"}, NULL},
-    {{"RT", RECT2ON}, NULL},
-    {{"RT", RECT3ON}, NULL},
-    {{"DL", DELAY2}, NULL},
-    {{"RT", RECT2OFF}, NULL},
-    {{"RT", RECT3OFF}, NULL},
-    {{"RT", RECT1ON}, NULL},
-    {{"RT", RECT4ON}, NULL},
-    {{"DL", DELAY2}, NULL},
+    {{"FS", "1,1000"}, NULL},
     //-----------------------------
 };
 

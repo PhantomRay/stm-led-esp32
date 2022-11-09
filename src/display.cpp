@@ -114,6 +114,17 @@ static bool get_rectangle_par(String parm_str, RECT_DESC *parm_rectangle) {
   return ret_val;
 }
 
+static bool get_fs_par(String parm_str, FLASHER_DESC *parm_fs) {
+  bool ret_val = false;
+  String parm_string_array[2];
+  if (parse_string(parm_str, parm_string_array, 2)) {
+    parm_fs->times = parm_string_array[0].toInt();
+    parm_fs->delay = parm_string_array[1].toInt();
+    ret_val        = true;
+  }
+  return ret_val;
+}
+
 static uint16_t read16(File &f) {
   uint16_t result;
   ((uint8_t *)&result)[0] = f.read(); // LSB
@@ -243,6 +254,26 @@ static void drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) {
   if (!goodBmp) Serial.println(F("BMP format not recognized."));
 }
 
+bool isStopCondition() {
+  if ((command_desc_update_flag == true) && (command_desc_stop_flag == true)) {
+    return true;
+  }
+  return false;
+}
+bool display_delay(uint16_t timeout_ms) {
+  led_matrix.showDMABuffer(true);
+  bool ret_val = false;
+  while (timeout_ms >= 100) {
+    if (isStopCondition()) {
+      ret_val = true;
+      break;
+    }
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+    timeout_ms -= 100;
+  };
+  return ret_val;
+}
+
 void display_task() {
   while (!command_desc_update_flag) {
     vTaskDelay(200 / portTICK_PERIOD_MS);
@@ -358,19 +389,36 @@ void display_task() {
       int16_t y = led_matrix.getCursorY();
       led_matrix.getTextBounds(cmd_parm, x, y, &x1, &y1, &w, &h);
       SerialCommand.printf("x=%d,y=%d,x1=%d,y1=%d,w=%d,h=%d\n", x, y, x1, y1, w, h);
+    } else if (cmd_type == "FS") { // flashing 4 rectangles
+      FLASHER_DESC fs_par;
+      uint16_t color16 = led_matrix.color565(255, 128, 0);
+      if (get_fs_par(cmd_parm, &fs_par)) {
+        uint16_t repeat_id = fs_par.times;
+        do {
+          led_matrix.fillRect(0, 0, 14, 14, 0);         // rect1 off
+          led_matrix.fillRect(82, 114, 14, 14, 0);      // rect4 off
+          led_matrix.fillRect(82, 0, 14, 14, color16);  // rect2 on
+          led_matrix.fillRect(0, 114, 14, 14, color16); // rect3 on
+          if (display_delay(fs_par.delay)) {
+            break;
+          }
+
+          led_matrix.fillRect(0, 0, 14, 14, color16);    // rect1 on
+          led_matrix.fillRect(82, 114, 14, 14, color16); // rect4 on
+          led_matrix.fillRect(82, 0, 14, 14, 0);         // rect2 off
+          led_matrix.fillRect(0, 114, 14, 14, 0);        // rect3 off
+          if (display_delay(fs_par.delay)) {
+            break;
+          }
+
+          repeat_id--;
+        } while (repeat_id);
+      }
     } else if (cmd_type == "DL") {
-      led_matrix.showDMABuffer(true);
       int delay_tm = cmd_parm.toInt();
-      do {
-        /*for FL command*/
-        if ((command_desc_update_flag == true) && (command_desc_stop_flag == true)) {
-          break;
-        }
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-        delay_tm -= 100;
-      } while (delay_tm > 100);
+      display_delay(delay_tm);
     }
-    if ((command_desc_update_flag == true) && (command_desc_stop_flag == true)) {
+    if (isStopCondition()) {
       break;
     }
     command_desc_tmp = (LED_COMMAND_DESCRIPTION *)(command_desc_tmp->qe_next);

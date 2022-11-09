@@ -8,9 +8,9 @@
 // cursor set to 10,20, print "HELLO, WORLD!"
 
 // command_type_num = sizeof(command_type) / sizeof(command_type[0]);
-#define COMMAND_TYPE_NUM 15
+#define COMMAND_TYPE_NUM 16
 const String command_type[COMMAND_TYPE_NUM] = {"CL", "BR", "FT", "SZ", "BG", "TC", "CR", "PT",
-                                               "IM", "CI", "RT", "DL", "FL", "AN", "HP"};
+                                               "IM", "CI", "RT", "DL", "FL", "AN", "FS", "HP"};
 String command_buffer = ""; // ="CL;F:font1;S:10;BG:255,0,0;TC:0,255,0;CR:10,20;P:\\HELLO, WORLD!\\;D:5000;CL\r";
 const char command_separate_char   = ';';
 const char parameter_separate_char = ':';

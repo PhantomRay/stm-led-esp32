@@ -48,6 +48,11 @@ typedef struct {
   COLOR_DESC color;
 } RECT_DESC;
 
+typedef struct {
+  uint16_t times;
+  uint16_t delay;
+} FLASHER_DESC;
+
 extern LED_COMMAND_DESCRIPTION *command_desc[2];
 extern uint8_t current_display_description_id;
 extern volatile bool command_desc_update_flag, command_desc_stop_flag;
