@@ -23,7 +23,7 @@
 | HP     |  string information |  string             |   HP:46 or HP:SLOW
 | DL     |   delay time        |  time ms            |   DL:2000
 | AN     |   sample animation  |                     |   AN     //use for only 6panel
-
+| FS     |  flash 4 rectangles |  times,delay        |   FS:5,300 (5times, 300ms)
 
 Type of Fonts
 ============= 
