@@ -83,6 +83,7 @@ static void command_parsing(const String cmd_buf) {
         break;
       }
     }
+
     // SerialCommand.printf("%s\t", cmd_string);
     // for(int char_id = 0; char_id < cmd_string.length(); char_id++){
     //     SerialCommand.printf("%x,", cmd_string.c_str()[char_id]);

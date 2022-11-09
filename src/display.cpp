@@ -260,6 +260,7 @@ bool isStopCondition() {
   }
   return false;
 }
+
 bool display_delay(uint16_t timeout_ms) {
   led_matrix.showDMABuffer(true);
   bool ret_val = false;
