@@ -49,13 +49,13 @@ ex2:    AN;
 
 ### Code formatting
 
-Instasll clang-format v14.0.0 or later.
+Instasll clang-format v15.
 ```sh
-clang-format -i src/* -style=file:.clang-format
+clang-format -i src/*.* -style=file:.clang-format
 ```
 
 For pre-commit, use the following:
 
 ```sh
-clang-format -i src/* -style=file:.clang-format -n -Werror
+clang-format -i src/*.* -style=file:.clang-format -n -Werror
 ```
