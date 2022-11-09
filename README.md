@@ -51,11 +51,11 @@ ex2:    AN;
 
 Instasll clang-format v14.0.0 or later.
 ```sh
-clang-format -i src/* -style=file:.clang-format
+clang-format -i src/*.* -style=file:.clang-format
 ```
 
 For pre-commit, use the following:
 
 ```sh
-clang-format -i src/* -style=file:.clang-format -n -Werror
+clang-format -i src/*.* -style=file:.clang-format -n -Werror
 ```
