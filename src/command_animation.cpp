@@ -31,10 +31,6 @@ String cmd_animation = "CR:0,16;IM:HappyFace_94x94.bmp";
 #define SLOW_POS "9,59"
 #define DOWN_POS "5,88"
 
-// LED_COMMAND_DESCRIPTION flash_desc[]={
-
-// };
-
 #define CMD_ANIMATION_DESC_SZ 41
 LED_COMMAND_DESCRIPTION cmd_animation_desc[CMD_ANIMATION_DESC_SZ] = {
     //----------------------------
