@@ -17,7 +17,7 @@
 #endif
 
 /* Enable serial debugging of the library, to see how memory is allocated etc. */
-#define SERIAL_DEBUG 0
+#define SERIAL_DEBUG  0
 
 #define PANEL_WIDTH 64
 #define PANEL_HEIGHT 32
