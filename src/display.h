@@ -5,6 +5,6 @@
 
 void display_init();
 void display_task();
-void test_display_text();
+void set_queue(LED_COMMAND_QUEUE *cmd_queue);
 
 #endif

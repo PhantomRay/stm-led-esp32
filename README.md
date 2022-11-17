@@ -22,7 +22,6 @@
 | FL     |   flush all command |  --                 |   FL
 | HP     |  string information |  string             |   HP:46 or HP:SLOW
 | DL     |   delay time        |  time ms            |   DL:2000
-| AN     |   sample animation  |                     |   AN     //use for only 6panel
 | FS     |  flash 4 rectangles |  times,delay        |   FS:5,300 (5times, 300ms)
 
 Type of Fonts
@@ -43,9 +42,7 @@ Caution:
 Users should be careful when fonts are changed.
 ex1:    bad command:        CL;FT:FreeSans12pt7b;PT:123     cursor_y < 0, error in PT command
         correct command:    FT:FreeSans12pt7b;CL;PT:123     cursor_y = 0, no any error
-ex2:    AN;
-        FL;CL;CR:0,64;PT:12     cursor_y in "CR:0,64" is less than 63, it happens error.(https://learn.adafruit.com/adafruit-gfx-graphics-library/using-fonts)
-        
+
 
 ### Code formatting
 

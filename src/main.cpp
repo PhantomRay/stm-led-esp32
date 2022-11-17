@@ -22,5 +22,4 @@ void setup() {
 void loop() {
   /* display_task */
   display_task();
-  // test_display_text();
 }

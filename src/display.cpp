@@ -19,6 +19,8 @@
 #include <Fonts/FreeSerif46pt7b.h>
 #include <Fonts/FreeSerifBold46pt7b.h>
 
+bool command_queue_update_flag = false;
+
 void display_init() {
   led_matrix.begin();
   command_init();
@@ -118,8 +120,8 @@ static bool get_fs_par(String parm_str, FLASHER_DESC *parm_fs) {
   bool ret_val = false;
   String parm_string_array[2];
   if (parse_string(parm_str, parm_string_array, 2)) {
-    parm_fs->times = parm_string_array[0].toInt();
-    parm_fs->delay = parm_string_array[1].toInt();
+    parm_fs->times = (uint16_t)parm_string_array[0].toInt();
+    parm_fs->delay = (uint32_t)parm_string_array[1].toInt();
     ret_val        = true;
   }
   return ret_val;
@@ -255,13 +257,13 @@ static void drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) {
 }
 
 bool isStopCondition() {
-  if ((command_desc_update_flag == true) && (command_desc_stop_flag == true)) {
+  if (command_queue_update_flag == true) {
     return true;
   }
   return false;
 }
 
-bool display_delay(uint16_t timeout_ms) {
+bool display_delay(uint32_t timeout_ms) {
   led_matrix.showDMABuffer(true);
   bool ret_val = false;
   while (timeout_ms >= 100) {
@@ -275,20 +277,46 @@ bool display_delay(uint16_t timeout_ms) {
   return ret_val;
 }
 
+LED_COMMAND_QUEUE command_queue = {NULL, NULL, 0, false};
+
+void set_queue(LED_COMMAND_QUEUE *cmd_queue) {
+  if (cmd_queue->stop_flag) {
+    command_queue.first       = cmd_queue->first;
+    command_queue.last        = cmd_queue->last;
+    command_queue.count       = cmd_queue->count;
+    command_queue_update_flag = true;
+    while (command_queue_update_flag) {
+      vTaskDelay(50 / portTICK_PERIOD_MS);
+    };
+  } else {
+    if (command_queue.first == NULL) {
+      command_queue.first = cmd_queue->first;
+      command_queue.count = cmd_queue->count;
+    } else {
+      command_queue.last->qe_next = cmd_queue->first;
+      command_queue.count += cmd_queue->count;
+    }
+    command_queue.last = cmd_queue->last;
+  }
+}
+
 void display_task() {
-  while (!command_desc_update_flag) {
-    vTaskDelay(200 / portTICK_PERIOD_MS);
+  LED_COMMAND_DESCRIPTION *command_desc_curr;
+  while (true) {
+    if (command_queue.first != NULL) {
+      command_desc_curr         = command_queue.first;
+      command_queue_update_flag = false;
+      break;
+    }
+    command_queue_update_flag = false;
+    vTaskDelay(50 / portTICK_PERIOD_MS);
   }
 
-  LED_COMMAND_DESCRIPTION *cmd_desc_first = command_desc[current_display_description_id];
-  command_desc_update_flag                = false;
-
-  LED_COMMAND_DESCRIPTION *command_desc_tmp = cmd_desc_first;
   String cmd_type;
   String cmd_parm;
-  while (command_desc_tmp != NULL) {
-    cmd_type = command_desc_tmp->cmd.type;
-    cmd_parm = command_desc_tmp->cmd.parameter;
+  while (true) {
+    cmd_type = command_desc_curr->cmd.type;
+    cmd_parm = command_desc_curr->cmd.parameter;
 
     if (cmd_type == "CL") {
       led_matrix.fillScreenRGB888(0, 0, 0);
@@ -417,15 +445,36 @@ void display_task() {
       }
     } else if (cmd_type == "DL") {
       int delay_tm = cmd_parm.toInt();
-      display_delay(delay_tm);
+      display_delay((uint32_t)delay_tm);
     }
+
+    bool load_flag = true;
+    while (true) {
+      if (isStopCondition()) {
+        break;
+      }
+
+      LED_COMMAND_DESCRIPTION *command_desc_next = (LED_COMMAND_DESCRIPTION *)(command_desc_curr->qe_next);
+      if (command_desc_next != NULL) {
+        delete command_desc_curr;
+        command_desc_curr = command_desc_next;
+        break;
+      } else {
+        if (load_flag) {
+          load_flag = false;
+          /*for a command list without D command - ex:"CL;P:Hello;"*/
+          led_matrix.showDMABuffer(true);
+        } else {
+          vTaskDelay(50 / portTICK_PERIOD_MS);
+        }
+      }
+    }
+
     if (isStopCondition()) {
       break;
     }
-    command_desc_tmp = (LED_COMMAND_DESCRIPTION *)(command_desc_tmp->qe_next);
   }
-  /*for a command list without D command - ex:"CL;P:Hello;"*/
-  led_matrix.showDMABuffer(true);
+  clear_command_desc(command_desc_curr);
 }
 
 bool get_text_start_point(uint16_t width, uint16_t height, int16_t *x, int16_t *y, int16_t y_offset) {
@@ -435,63 +484,4 @@ bool get_text_start_point(uint16_t width, uint16_t height, int16_t *x, int16_t *
     return true;
   }
   return false;
-}
-void test_display_text() {
-  // GFXfont *curr_font = &FreeSerif46pt7b;
-  // led_matrix.setFont(curr_font);
-  // led_matrix.setCursor(0, 0);
-  // int16_t x1, y1;
-  // uint16_t w, h;
-  // // bool one_line_flag = true;
-  // // for (int i = 0; i < 99; i++) {
-  // //   led_matrix.getTextBounds(String(i), 0, 0, &x1, &y1, &w, &h);
-  // //   // SerialCommand.printf("%d:x1=%d,y1=%d,w=%d,h=%d\n", i, x1, y1, w, h);
-  // //   if (h > 64) {
-  // //     SerialCommand.printf("%d:x1=%d,y1=%d,w=%d,h=%d\n", i, x1, y1, w, h);
-  // //     one_line_flag = false;
-  // //   }
-  // // }
-  // x1 = (led_matrix.width() - curr_font->glyph->xAdvance) / 2;
-  // y1 = (led_matrix.height() - 60) / 2 + 60;
-  // for (int i = 0; i < 10; i++) {
-  //   led_matrix.fillScreenRGB888(0, 0, 0);
-  //   // led_matrix.getTextBounds(String(i), 0, 0, &x1, &y1, &w, &h);
-  //   // get_text_start_point(w, h, &x1, &y1, 61);
-  //   led_matrix.setCursor(x1, y1);
-  //   led_matrix.println(String(i));
-  //   led_matrix.showDMABuffer(true);
-  //   vTaskDelay(1500 / portTICK_PERIOD_MS);
-  // }
-  // x1 = (led_matrix.width() - (curr_font->glyph->xAdvance) * 2) / 2;
-  // y1 = (led_matrix.height() - 60) / 2 + 60;
-  // for (int i = 10; i < 99; i++) {
-  //   led_matrix.fillScreenRGB888(0, 0, 0);
-  //   // led_matrix.getTextBounds(String(i), 0, 0, &x1, &y1, &w, &h);
-  //   // get_text_start_point(w, h, &x1, &y1, 61);
-  //   led_matrix.setCursor(x1, y1);
-  //   led_matrix.println(String(i));
-  //   led_matrix.showDMABuffer(true);
-  //   vTaskDelay(1500 / portTICK_PERIOD_MS);
-  // }
-
-  /*get a position for "SLOW" and "DOWN"*/
-  int16_t x0, x1, y0, y1;
-  uint16_t w, h;
-  const GFXfont *curr_font = &FreeSerif14pt7b;
-  led_matrix.setFont(curr_font);
-  led_matrix.setCursor(0, 0);
-  led_matrix.getTextBounds("SLOW", 0, 0, &x0, &y0, &w, &h);
-  get_text_start_point(w, h * 2 + 10, &x0, &y0, h);
-  Serial.printf("SLOW x = %d, y = %d\n", x0, y0);
-  led_matrix.setCursor(x0, y0);
-  led_matrix.println("SLOW");
-
-  led_matrix.getTextBounds("DOWN", 0, 0, &x1, &y1, &w, &h);
-  get_text_start_point(w, h * 2 + 10, &x1, &y1, h);
-  y1 = y0 + 10 + h;
-  Serial.printf("DOWN x = %d, y = %d\n", x1, y1);
-  led_matrix.setCursor(x1, y1);
-  led_matrix.println("DOWN");
-  led_matrix.showDMABuffer(true);
-  vTaskDelay(3000 / portTICK_PERIOD_MS);
 }

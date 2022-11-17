@@ -19,6 +19,13 @@ typedef struct {
 } LED_COMMAND_DESCRIPTION;
 
 typedef struct {
+  LED_COMMAND_DESCRIPTION *first;
+  LED_COMMAND_DESCRIPTION *last;
+  uint16_t count;
+  bool stop_flag;
+} LED_COMMAND_QUEUE;
+
+typedef struct {
   int8_t r;
   int8_t g;
   int8_t b;
@@ -49,14 +56,11 @@ typedef struct {
 
 typedef struct {
   uint16_t times;
-  uint16_t delay;
+  uint32_t delay;
 } FLASHER_DESC;
-
-extern LED_COMMAND_DESCRIPTION *command_desc[2];
-extern uint8_t current_display_description_id;
-extern volatile bool command_desc_update_flag, command_desc_stop_flag;
 
 void command_init();
 void command_task(void *pvParameter);
+void clear_command_desc(LED_COMMAND_DESCRIPTION *p_command_desc_first);
 
 #endif
