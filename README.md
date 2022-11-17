@@ -46,7 +46,7 @@ ex1:    bad command:        CL;FT:FreeSans12pt7b;PT:123     cursor_y < 0, error 
 
 ### Code formatting
 
-Instasll clang-format v14.0.0 or later.
+Instasll clang-format v15.
 ```sh
 clang-format -i src/*.* -style=file:.clang-format
 ```

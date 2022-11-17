@@ -21,7 +21,6 @@ void clear_command_desc(LED_COMMAND_DESCRIPTION *p_command_desc_first) {
   LED_COMMAND_DESCRIPTION *command_desc_next;
   LED_COMMAND_DESCRIPTION *command_desc_tmp = p_command_desc_first;
   while (command_desc_tmp != NULL) {
-    Serial.printf("type:%s param:%s\n", command_desc_tmp->cmd.type, command_desc_tmp->cmd.parameter);
     command_desc_next = (LED_COMMAND_DESCRIPTION *)(command_desc_tmp->qe_next);
     delete command_desc_tmp;
     command_desc_tmp = command_desc_next;
