@@ -94,7 +94,9 @@ static LED_COMMAND_QUEUE *command_parsing(const String cmd_buf) {
 }
 
 void command_init() {
-  // SerialCommand.begin(115200, SERIAL_8N1, COMMAND_RX_PIN, COMMAND_TX_PIN);
+#ifdef COMMAND_SERIAL
+  SerialCommand.begin(115200, SERIAL_8N1, COMMAND_RX_PIN, COMMAND_TX_PIN);
+#endif
   delay(100);
   command_buffer = "";
 
