@@ -19,9 +19,13 @@
 #include <Fonts/FreeSerif46pt7b.h>
 #include <Fonts/FreeSerifBold46pt7b.h>
 
-bool command_queue_update_flag = false;
+LED_COMMAND_QUEUE command_queue = {NULL, NULL, 0, false};
+bool command_queue_stop_flag    = false;
 
 void display_init() {
+  command_queue           = {NULL, NULL, 0, false};
+  command_queue_stop_flag = false;
+
   led_matrix.begin();
   command_init();
 }
@@ -257,7 +261,7 @@ static void drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) {
 }
 
 bool isStopCondition() {
-  if (command_queue_update_flag == true) {
+  if (command_queue_stop_flag == true) {
     return true;
   }
   return false;
@@ -277,46 +281,56 @@ bool display_delay(uint32_t timeout_ms) {
   return ret_val;
 }
 
-LED_COMMAND_QUEUE command_queue = {NULL, NULL, 0, false};
-
 void set_queue(LED_COMMAND_QUEUE *cmd_queue) {
-  if (cmd_queue->stop_flag) {
-    command_queue.first       = cmd_queue->first;
-    command_queue.last        = cmd_queue->last;
-    command_queue.count       = cmd_queue->count;
-    command_queue_update_flag = true;
-    while (command_queue_update_flag) {
+  if ((cmd_queue->stop_flag) || (command_queue.first == NULL)) {
+    command_queue.first     = cmd_queue->first;
+    command_queue.last      = cmd_queue->last;
+    command_queue.count     = cmd_queue->count;
+    command_queue_stop_flag = true;
+    while (command_queue_stop_flag) {
       vTaskDelay(50 / portTICK_PERIOD_MS);
     };
+
+#ifdef COMMAND_DEBUG
+    Serial.print("New command queue start");
+#endif
   } else {
-    if (command_queue.first == NULL) {
-      command_queue.first = cmd_queue->first;
-      command_queue.count = cmd_queue->count;
-    } else {
+    if (cmd_queue->first != NULL) {
       command_queue.last->qe_next = cmd_queue->first;
+      command_queue.last          = cmd_queue->last;
       command_queue.count += cmd_queue->count;
+#ifdef COMMAND_DEBUG
+      Serial.printf("Add %d commands\n", cmd_queue->count);
+#endif
     }
-    command_queue.last = cmd_queue->last;
   }
+  vTaskDelay(50 / portTICK_PERIOD_MS);
 }
 
 void display_task() {
   LED_COMMAND_DESCRIPTION *command_desc_curr;
   while (true) {
-    if (command_queue.first != NULL) {
-      command_desc_curr         = command_queue.first;
-      command_queue_update_flag = false;
-      break;
+    if (command_queue_stop_flag) {
+      if (command_queue.first != NULL) {
+        command_desc_curr       = command_queue.first;
+        command_queue_stop_flag = false;
+        break;
+      }
+      command_queue_stop_flag = false;
     }
-    command_queue_update_flag = false;
     vTaskDelay(50 / portTICK_PERIOD_MS);
   }
-
+#ifdef COMMAND_DEBUG
+  Serial.printf("New commands %d\n", command_queue.count);
+#endif
   String cmd_type;
   String cmd_parm;
   while (true) {
     cmd_type = command_desc_curr->cmd.type;
     cmd_parm = command_desc_curr->cmd.parameter;
+#ifdef COMMAND_DEBUG
+    Serial.printf("run_type:%s, run_param:%s\n", cmd_type, cmd_parm);
+#endif
 
     if (cmd_type == "CL") {
       led_matrix.fillScreenRGB888(0, 0, 0);

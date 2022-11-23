@@ -4,9 +4,14 @@
 #include "Arduino.h"
 
 // #define COMMAND_DEBUG
-#define SerialCommand Serial // Serial1
+#define COMMAND_SERIAL
+#ifdef COMMAND_SERIAL
+#define SerialCommand Serial1
 #define COMMAND_RX_PIN GPIO_NUM_21
 #define COMMAND_TX_PIN GPIO_NUM_22
+#else
+#define SerialCommand Serial
+#endif
 
 typedef struct {
   String type;

@@ -10,17 +10,38 @@
 #define COMMAND_TYPE_NUM 15
 const String command_type[COMMAND_TYPE_NUM] = {"CL", "BR", "FT", "SZ", "BG", "TC", "CR", "PT",
                                                "IM", "CI", "RT", "DL", "FL", "FS", "HP"};
-String command_buffer = ""; // ="CL;F:font1;S:10;BG:255,0,0;TC:0,255,0;CR:10,20;P:\\HELLO, WORLD!\\;D:5000;CL\r";
+
 const char command_separate_char   = ';';
 const char parameter_separate_char = ':';
 
 LED_COMMAND_QUEUE new_queue;
+
+void print_hex(String &buf) {
+  size_t len           = buf.length();
+  const char *buf_char = buf.c_str();
+  for (int i = 0; i < len; i++) {
+    Serial.printf("%x ", buf_char[i]);
+  }
+  Serial.println();
+}
+
+void print_string(String &buf) {
+  size_t len           = buf.length();
+  const char *buf_char = buf.c_str();
+  for (int i = 0; i < len; i++) {
+    Serial.printf("%c", buf_char[i]);
+  }
+  Serial.println();
+}
 
 void clear_command_desc(LED_COMMAND_DESCRIPTION *p_command_desc_first) {
   int command_num = 0;
   LED_COMMAND_DESCRIPTION *command_desc_next;
   LED_COMMAND_DESCRIPTION *command_desc_tmp = p_command_desc_first;
   while (command_desc_tmp != NULL) {
+#ifdef COMMAND_DEBUG
+    Serial.printf("del_type:%s del_param:%s\n", command_desc_tmp->cmd.type, command_desc_tmp->cmd.parameter);
+#endif
     command_desc_next = (LED_COMMAND_DESCRIPTION *)(command_desc_tmp->qe_next);
     delete command_desc_tmp;
     command_desc_tmp = command_desc_next;
@@ -94,9 +115,10 @@ static LED_COMMAND_QUEUE *command_parsing(const String cmd_buf) {
 }
 
 void command_init() {
-  // SerialCommand.begin(115200, SERIAL_8N1, COMMAND_RX_PIN, COMMAND_TX_PIN);
+#ifdef COMMAND_SERIAL
+  SerialCommand.begin(115200, SERIAL_8N1, COMMAND_RX_PIN, COMMAND_TX_PIN);
+#endif
   delay(100);
-  command_buffer = "";
 
   SerialCommand.setTimeout(200);
 }
@@ -104,27 +126,58 @@ void command_init() {
 #define MAX_COMMAND_STRING 256
 void command_task(void *pvParameter) {
   String rx_buf;
+  String command_rxbuffer = ""; // ="CL;F:font1;S:10;BG:255,0,0;TC:0,255,0;CR:10,20;P:\\HELLO, WORLD!\\;D:5000;CL\r";
+  int pos;
   while (1) {
     Serial.println("Input a new Command:");
     while (1) {
       if (SerialCommand.available() > 0) {
-        rx_buf = SerialCommand.readStringUntil('\r');
-        command_buffer += rx_buf;
-        Serial.printf("%s", rx_buf);
-        if (command_buffer.length() > MAX_COMMAND_STRING) {
-          Serial.println("Command String is longer than 256bytes.Please input again.\n");
-          command_buffer = "";
-        } else {
-          if ((rx_buf.indexOf("\r") != -1) || (rx_buf.indexOf("\n") != -1)) {
-            break;
-          }
+        rx_buf = SerialCommand.readString();
+        pos    = rx_buf.indexOf('\n');
+        command_rxbuffer += rx_buf;
+        pos = rx_buf.indexOf('\n');
+        if (pos != -1) {
+          break;
         }
       }
       vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 
-    LED_COMMAND_QUEUE *cmd_queue = command_parsing(command_buffer);
-    set_queue(cmd_queue);
-    command_buffer = "";
+    pos = command_rxbuffer.indexOf('\n');
+#ifdef COMMAND_DEBUG
+    print_hex(command_rxbuffer);
+    Serial.printf("pos:%d\n", pos);
+#endif
+    int pos_end = 0;
+    String cmd_buf;
+    while (1) {
+      pos_end = pos;
+      if (pos != 0) {
+        if (command_rxbuffer.c_str()[pos - 1] == '\r') {
+          pos_end -= 1;
+        }
+      }
+      cmd_buf = command_rxbuffer.substring(0, pos_end);
+#ifdef COMMAND_DEBUG
+      Serial.println("command buffer hex:");
+      print_hex(cmd_buf);
+      Serial.println("command buffer string:");
+      print_string(cmd_buf);
+#endif
+      LED_COMMAND_QUEUE *cmd_queue = command_parsing(cmd_buf);
+      set_queue(cmd_queue);
+      command_rxbuffer = command_rxbuffer.substring(pos + 1);
+
+      pos = command_rxbuffer.indexOf('\n');
+      if (pos == -1) {
+#ifdef COMMAND_DEBUG
+        Serial.println("remaining buffer hex:");
+        print_hex(command_rxbuffer);
+        Serial.println("remaining buffer string:");
+        print_string(command_rxbuffer);
+#endif
+        break;
+      }
+    }
   }
 }
