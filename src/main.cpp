@@ -16,7 +16,14 @@ void setup() {
 
   display_init();
 
-  xTaskCreate(&command_task, "command_task", 4096 /*configMINIMAL_STACK_SIZE*/, NULL, 5, NULL);
+  // xTaskCreate(command_task, "command_task", 4096 /*configMINIMAL_STACK_SIZE*/, NULL, 5, NULL);
+  xTaskCreatePinnedToCore(command_task,   /* Function to implement the task */
+                          "command_task", /* Name of the task */
+                          4096,           /* Stack size in words */
+                          NULL,           /* Task input parameter */
+                          0,              /* Priority of the task */
+                          NULL,           /* Task handle. */
+                          1);             /* Core where the task should run */
 }
 
 void loop() {
