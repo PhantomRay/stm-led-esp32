@@ -270,13 +270,13 @@ bool isStopCondition() {
 bool display_delay(uint32_t timeout_ms) {
   led_matrix.showDMABuffer(true);
   bool ret_val = false;
-  while (timeout_ms >= 100) {
+  while (timeout_ms >= 50) {
     if (isStopCondition()) {
       ret_val = true;
       break;
     }
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-    timeout_ms -= 100;
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+    timeout_ms -= 50;
   };
   return ret_val;
 }

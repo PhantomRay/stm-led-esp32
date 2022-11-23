@@ -120,7 +120,7 @@ void command_init() {
 #endif
   delay(100);
 
-  SerialCommand.setTimeout(200);
+  SerialCommand.setTimeout(50);
 }
 
 #define MAX_COMMAND_STRING 256
@@ -140,7 +140,7 @@ void command_task(void *pvParameter) {
           break;
         }
       }
-      vTaskDelay(100 / portTICK_PERIOD_MS);
+      vTaskDelay(50 / portTICK_PERIOD_MS);
     }
 
     pos = command_rxbuffer.indexOf('\n');
