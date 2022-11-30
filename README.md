@@ -11,11 +11,15 @@
 | CL     |   clear             |  None               |   CL
 | BR     |   brightness        |  0~100              |   BR:60
 | FT     |   font type         |  font type          |   FT:FreeMono9pt7b
+                                                     |   FT
 | SZ     |   font size         |  size               |   SZ:2
 | BG     |   background clor   |  red,green,blue     |   BG:255,0,0
 | TC     |   text color        |  red,green,blue     |   TC:0,0,255
 | CR     |   cursor            |  x,y                |   CR:10,20
-| PT     |   a string to print |  string             |   PT:Hello World
+| GR     |   grid              |                     |   GR
+| PT     |   print a string(left)                    |   PT:Hello World
+| PC     |   print a string(horizontal center)       |   PC:Hello World
+| SC     |   print a string(screen center)           |   SC:Hello World
 | IM     |   a image to load   |  image name         |   IM:smile.bmp
 | CI     |   fill circle       |  x,y,radius,r,g,b   |   CI:x,y,radius,r,g,b
 | RT     |   fill rectangle    |  x,y,w,h,r,g,b      |   CI:x,y,width,height,r,g,b
@@ -40,8 +44,7 @@ result - x=?,y=?,x1=?,y1=?,w=?,h=? (w: width, h:height)
 
 Caution:
 Users should be careful when fonts are changed.
-ex1:    bad command:        CL;FT:FreeSans12pt7b;PT:123     cursor_y < 0, error in PT command
-        correct command:    FT:FreeSans12pt7b;CL;PT:123     cursor_y = 0, no any error
+
 
 
 ### Code formatting
