@@ -68,4 +68,6 @@ void command_init();
 void command_task(void *pvParameter);
 void clear_command_desc(LED_COMMAND_DESCRIPTION *p_command_desc_first);
 
+void print_hex(String &buf);
+
 #endif

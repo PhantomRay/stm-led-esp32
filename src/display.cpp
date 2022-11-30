@@ -19,6 +19,22 @@
 #include <Fonts/FreeSerif46pt7b.h>
 #include <Fonts/FreeSerifBold46pt7b.h>
 
+typedef struct {
+  String name;
+  const GFXfont *param;
+} FONT_INFO;
+#define FONT_INFO_NUM 14
+FONT_INFO font_inf[FONT_INFO_NUM] = {
+    {"FreeMono9pt7b", &FreeMono9pt7b},     {"FreeMono12pt7b", &FreeMono12pt7b},
+    {"FreeSans9pt7b", &FreeSans9pt7b},     {"FreeSans12pt7b", &FreeSans12pt7b},
+    {"FreeSerif9pt7b", &FreeSerif9pt7b},   {"FreeSerif12pt7b", &FreeSerif12pt7b},
+    {"FreeSerif14pt7b", &FreeSerif14pt7b}, {"FreeSerif16pt7b", &FreeSerif16pt7b},
+    {"FreeSerif18pt7b", &FreeSerif18pt7b}, {"FreeSerif24pt7b", &FreeSerif24pt7b},
+    {"FreeSans46pt7b", &FreeSans46pt7b},   {"FreeSansBold46pt7b", &FreeSansBold46pt7b},
+    {"FreeSerif46pt7b", &FreeSerif46pt7b}, {"FreeSerifBold46pt7b", &FreeSerifBold46pt7b},
+};
+FONT_INFO *current_font_inf = NULL;
+
 LED_COMMAND_QUEUE command_queue = {NULL, NULL, 0, false};
 bool command_queue_stop_flag    = false;
 
@@ -307,6 +323,89 @@ void set_queue(LED_COMMAND_QUEUE *cmd_queue) {
   vTaskDelay(50 / portTICK_PERIOD_MS);
 }
 
+void get_text_newline(String &analy_string, String &out_string, uint16_t *w, uint16_t *h) {
+  int16_t x, y, x1, y1;
+  int pos;
+  pos = analy_string.indexOf("\\");
+  if (pos == -1) {
+    out_string   = analy_string;
+    analy_string = "";
+  } else {
+    out_string   = analy_string.substring(0, pos);
+    analy_string = analy_string.substring(pos + 1);
+  }
+#ifdef COMMAND_DEBUG
+  Serial.printf("New Line:%s\t", out_string);
+// for (int i = 0; i < new_str.length(); i++) {
+//   Serial.printf("%x ", new_str.c_str()[i]);
+// }
+#endif
+
+  if (current_font_inf == NULL) {
+    x = 0;
+    y = 0;
+  } else {
+    x = 0;
+    y = 60;
+  }
+  led_matrix.getTextBounds(out_string, x, y, &x1, &y1, w, h);
+  // SerialCommand.printf("x=%d,y=%d,x1=%d,y1=%d,w=%d,h=%d\n", x, y, x1, y1, *w, *h);
+}
+
+bool get_textalignleft_cursor(uint16_t w, uint16_t h, int16_t *new_x, int16_t *new_y) {
+  int16_t x = led_matrix.getCursorX();
+  int16_t y = led_matrix.getCursorY();
+  // SerialCommand.printf("cur_x=%d,cur_y=%d\n", x, y);
+  if (current_font_inf == NULL) {
+    if ((y + 6) > led_matrix.height()) {
+      y = 0;
+    }
+  } else {
+    if ((y >= led_matrix.height()) || ((y + 1) < h)) {
+      y = h - 1;
+    }
+  }
+
+  *new_x = 0;
+  *new_y = y;
+
+  return true;
+}
+
+bool get_textaligncenter_cursor(uint16_t w, uint16_t h, int16_t *new_x, int16_t *new_y) {
+  int16_t x = led_matrix.getCursorX();
+  int16_t y = led_matrix.getCursorY();
+  // SerialCommand.printf("cur_x=%d,cur_y=%d\n", x, y);
+  if (current_font_inf == NULL) {
+    if ((y + 6) > led_matrix.height()) {
+      y = 0;
+    }
+  } else {
+    if ((y >= led_matrix.height()) || ((y + 1) < h)) {
+      y = h - 1;
+    }
+  }
+  x = (led_matrix.width() - w) / 2;
+  // SerialCommand.printf("new_x=%d,new_y=%d\n", x, y);
+  *new_x = x;
+  *new_y = y;
+
+  return true;
+}
+
+void check_cursor() {
+  int16_t x = led_matrix.getCursorX();
+  int16_t y = led_matrix.getCursorY();
+  if ((x < 0) || (x >= led_matrix.width())) {
+    x = 0;
+  }
+  if ((y < 0) || (y >= led_matrix.height())) {
+    y = 0;
+  }
+
+  led_matrix.setCursor(x, y);
+}
+
 void display_task() {
   LED_COMMAND_DESCRIPTION *command_desc_curr;
   while (true) {
@@ -343,42 +442,24 @@ void display_task() {
         Serial.println("Brightness is less than 100.");
       }
     } else if (cmd_type == "FT") {
-      if (cmd_parm == "default") {
+      if ((cmd_parm == "default") || (cmd_parm == "")) {
         led_matrix.setFont();
+        current_font_inf = NULL;
       } else {
         led_matrix.setTextSize(1);
-        if (cmd_parm == "FreeMono9pt7b") {
-          led_matrix.setFont(&FreeMono9pt7b);
-        } else if (cmd_parm == "FreeMono12pt7b") {
-          led_matrix.setFont(&FreeMono12pt7b);
-        } else if (cmd_parm == "FreeSans9pt7b") {
-          led_matrix.setFont(&FreeSans9pt7b);
-        } else if (cmd_parm == "FreeSans12pt7b") {
-          led_matrix.setFont(&FreeSans12pt7b);
-        } else if (cmd_parm == "FreeSerif9pt7b") {
-          led_matrix.setFont(&FreeSerif9pt7b);
-        } else if (cmd_parm == "FreeSerif12pt7b") {
-          led_matrix.setFont(&FreeSerif12pt7b);
-        } else if (cmd_parm == "FreeSerif14pt7b") {
-          led_matrix.setFont(&FreeSerif14pt7b);
-        } else if (cmd_parm == "FreeSerif16pt7b") {
-          led_matrix.setFont(&FreeSerif16pt7b);
-        } else if (cmd_parm == "FreeSerif18pt7b") {
-          led_matrix.setFont(&FreeSerif18pt7b);
-        } else if (cmd_parm == "FreeSerif24pt7b") {
-          led_matrix.setFont(&FreeSerif24pt7b);
-        } else if (cmd_parm == "FreeSans46pt7b") {
-          led_matrix.setFont(&FreeSans46pt7b);
-        } else if (cmd_parm == "FreeSansBold46pt7b") {
-          led_matrix.setFont(&FreeSansBold46pt7b);
-        } else if (cmd_parm == "FreeSerif46pt7b") {
-          led_matrix.setFont(&FreeSerif46pt7b);
-        } else if (cmd_parm == "FreeSerifBold46pt7b") {
-          led_matrix.setFont(&FreeSerifBold46pt7b);
-        } else {
+        int i;
+        for (i = 0; i < FONT_INFO_NUM; i++) {
+          if (cmd_parm == font_inf[i].name) {
+            led_matrix.setFont(font_inf[i].param);
+            current_font_inf = &font_inf[i];
+            break;
+          }
+        }
+        if (i == FONT_INFO_NUM) {
           Serial.println("Font no support.");
         }
       }
+      check_cursor();
     } else if (cmd_type == "SZ") {
       // use only for defualt font
       //  Desired text size. 1 is default 6x8, 2 is 12x16, 3 is 18x24, etc
@@ -405,8 +486,103 @@ void display_task() {
       } else {
         Serial.println("Err:Text Color");
       }
+    } else if (cmd_type == "GR") { // grid
+      uint16_t color16 = led_matrix.color565(255, 0, 0);
+      for (int i = 7; i < led_matrix.width(); i += 8) {
+        led_matrix.drawLine(i, 0, i, led_matrix.height() - 1, color16);
+      }
+      for (int i = 7; i < led_matrix.height(); i += 8) {
+        led_matrix.drawLine(0, i, led_matrix.width() - 1, i, color16);
+      }
     } else if (cmd_type == "PT") { // print a string
-      led_matrix.println(cmd_parm);
+      if (current_font_inf == NULL) {
+        check_cursor();
+        led_matrix.println(cmd_parm);
+      } else {
+        int16_t x, y;
+        uint16_t w, h;
+        String new_str = "";
+
+        while (1) {
+          if (cmd_parm == "") {
+            break;
+          }
+          get_text_newline(cmd_parm, new_str, &w, &h);
+          if (get_textalignleft_cursor(w, h, &x, &y)) {
+            led_matrix.setCursor(x, y);
+            led_matrix.println(new_str);
+          }
+        }
+      }
+    } else if (cmd_type == "PC") { // print a string with hozontal center alignment
+      int16_t x, y;
+      uint16_t w, h;
+      String new_str = "";
+
+      while (1) {
+        if (cmd_parm == "") {
+          break;
+        }
+
+        get_text_newline(cmd_parm, new_str, &w, &h);
+        if (get_textaligncenter_cursor(w, h, &x, &y)) {
+          led_matrix.setCursor(x, y);
+          led_matrix.println(new_str);
+        }
+      }
+    } else if (cmd_type == "SC") { // print a string with screem center alignment
+      int16_t x, y;
+      uint16_t w, h;
+      String new_str        = "";
+      String tmp_str        = cmd_parm;
+      uint16_t total_height = 0;
+      uint16_t last_space   = 0;
+      uint16_t line_height  = 8; // default font New line distance
+      if (current_font_inf != NULL) {
+        line_height = current_font_inf->param->yAdvance;
+      }
+
+      // estimate total height
+      get_text_newline(cmd_parm, new_str, &w, &h);
+      if (h <= line_height) {
+        total_height = h;
+      }
+      while (1) {
+        if (cmd_parm == "") {
+          break;
+        }
+        get_text_newline(cmd_parm, new_str, &w, &h);
+        if (h <= line_height) {
+          total_height += line_height;
+        }
+      }
+      // Serial.printf("total_height=%d", total_height);
+      if (total_height > led_matrix.height()) {
+        break;
+      }
+      y = (led_matrix.height() - total_height) / 2;
+      led_matrix.setCursor(0, y);
+
+      // display all text line in screen center alignment mode
+      cmd_parm             = tmp_str;
+      bool first_line_flag = true;
+      while (1) {
+        if (cmd_parm == "") {
+          break;
+        }
+        get_text_newline(cmd_parm, new_str, &w, &h);
+        if ((first_line_flag) && (current_font_inf != NULL)) {
+          first_line_flag = false;
+          y += h - 1;
+          led_matrix.setCursor(0, y);
+        }
+        if (h <= line_height) {
+          if (get_textaligncenter_cursor(w, h, &x, &y)) {
+            led_matrix.setCursor(x, y);
+            led_matrix.println(new_str);
+          }
+        }
+      }
     } else if (cmd_type == "IM") { // load an image
       uint8_t x = led_matrix.getCursorX();
       uint8_t y = led_matrix.getCursorY();

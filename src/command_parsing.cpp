@@ -7,9 +7,9 @@
 // cursor set to 10,20, print "HELLO, WORLD!"
 
 // command_type_num = sizeof(command_type) / sizeof(command_type[0]);
-#define COMMAND_TYPE_NUM 15
-const String command_type[COMMAND_TYPE_NUM] = {"CL", "BR", "FT", "SZ", "BG", "TC", "CR", "PT",
-                                               "IM", "CI", "RT", "DL", "FL", "FS", "HP"};
+#define COMMAND_TYPE_NUM 18
+const String command_type[COMMAND_TYPE_NUM] = {"CL", "BR", "FT", "SZ", "BG", "TC", "CR", "GR", "PT",
+                                               "PC", "SC", "IM", "CI", "RT", "DL", "FL", "FS", "HP"};
 
 const char command_separate_char   = ';';
 const char parameter_separate_char = ':';
@@ -133,7 +133,8 @@ void command_task(void *pvParameter) {
     while (1) {
       if (SerialCommand.available() > 0) {
         rx_buf = SerialCommand.readString();
-        pos    = rx_buf.indexOf('\n');
+        // Serial.printf("%s", rx_buf);
+        pos = rx_buf.indexOf('\n');
         command_rxbuffer += rx_buf;
         pos = rx_buf.indexOf('\n');
         if (pos != -1) {
