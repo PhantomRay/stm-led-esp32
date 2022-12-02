@@ -3,35 +3,30 @@
 #include "ESP32-ICND2153-I2S-DMA.h"
 
 // https://rop.nl/truetype2gfx/
-#include <Fonts/FreeMono9pt7b.h>
-#include <Fonts/FreeMono12pt7b.h>
+
 #include <Fonts/FreeSans9pt7b.h>
 #include <Fonts/FreeSans12pt7b.h>
-#include <Fonts/FreeSerif9pt7b.h>
-#include <Fonts/FreeSerif12pt7b.h>
-#include <Fonts/FreeSerif14pt7b.h>
-#include <Fonts/FreeSerif16pt7b.h>
-#include <Fonts/FreeSerif18pt7b.h>
-#include <Fonts/FreeSerif24pt7b.h>
-
+#include <Fonts/FreeSans18pt7b.h>
+#include <Fonts/FreeSans24pt7b.h>
 #include <Fonts/FreeSans46pt7b.h>
+
+#include <Fonts/FreeSansBold9pt7b.h>
+#include <Fonts/FreeSansBold12pt7b.h>
+#include <Fonts/FreeSansBold18pt7b.h>
+#include <Fonts/FreeSansBold24pt7b.h>
 #include <Fonts/FreeSansBold46pt7b.h>
-#include <Fonts/FreeSerif46pt7b.h>
-#include <Fonts/FreeSerifBold46pt7b.h>
 
 typedef struct {
   String name;
   const GFXfont *param;
 } FONT_INFO;
-#define FONT_INFO_NUM 14
+#define FONT_INFO_NUM 10
 FONT_INFO font_inf[FONT_INFO_NUM] = {
-    {"FreeMono9pt7b", &FreeMono9pt7b},     {"FreeMono12pt7b", &FreeMono12pt7b},
-    {"FreeSans9pt7b", &FreeSans9pt7b},     {"FreeSans12pt7b", &FreeSans12pt7b},
-    {"FreeSerif9pt7b", &FreeSerif9pt7b},   {"FreeSerif12pt7b", &FreeSerif12pt7b},
-    {"FreeSerif14pt7b", &FreeSerif14pt7b}, {"FreeSerif16pt7b", &FreeSerif16pt7b},
-    {"FreeSerif18pt7b", &FreeSerif18pt7b}, {"FreeSerif24pt7b", &FreeSerif24pt7b},
-    {"FreeSans46pt7b", &FreeSans46pt7b},   {"FreeSansBold46pt7b", &FreeSansBold46pt7b},
-    {"FreeSerif46pt7b", &FreeSerif46pt7b}, {"FreeSerifBold46pt7b", &FreeSerifBold46pt7b},
+    {"FreeSans9pt7b", &FreeSans9pt7b},           {"FreeSans12pt7b", &FreeSans12pt7b},
+    {"FreeSans18pt7b", &FreeSans18pt7b},         {"FreeSans24pt7b", &FreeSans24pt7b},
+    {"FreeSans46pt7b", &FreeSans46pt7b},         {"FreeSansBold9pt7b", &FreeSansBold9pt7b},
+    {"FreeSansBold12pt7b", &FreeSansBold12pt7b}, {"FreeSansBold18pt7b", &FreeSansBold18pt7b},
+    {"FreeSansBold24pt7b", &FreeSansBold24pt7b}, {"FreeSansBold46pt7b", &FreeSansBold46pt7b},
 };
 FONT_INFO *current_font_inf = NULL;
 
