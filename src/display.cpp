@@ -318,8 +318,9 @@ void set_queue(LED_COMMAND_QUEUE *cmd_queue) {
   vTaskDelay(50 / portTICK_PERIOD_MS);
 }
 
-void get_text_newline(String &analy_string, String &out_string, uint16_t *w, uint16_t *h) {
-  int16_t x, y, x1, y1;
+void get_text_newline(String &analy_string, String &out_string, int16_t *ul_x, int16_t *ul_y, uint16_t *w,
+                      uint16_t *h) {
+  int16_t x, y;
   int pos;
   pos = analy_string.indexOf("\\");
   if (pos == -1) {
@@ -341,10 +342,10 @@ void get_text_newline(String &analy_string, String &out_string, uint16_t *w, uin
     y = 0;
   } else {
     x = 0;
-    y = 60;
+    y = led_matrix.height() - 1;
   }
-  led_matrix.getTextBounds(out_string, x, y, &x1, &y1, w, h);
-  // SerialCommand.printf("x=%d,y=%d,x1=%d,y1=%d,w=%d,h=%d\n", x, y, x1, y1, *w, *h);
+  led_matrix.getTextBounds(out_string, x, y, ul_x, ul_y, w, h);
+  // SerialCommand.printf("x=%d,y=%d,x1=%d,y1=%d,w=%d,h=%d\n", x, y, *ul_x, *ul_y, *w, *h);
 }
 
 bool get_textalignleft_cursor(uint16_t w, uint16_t h, int16_t *new_x, int16_t *new_y) {
@@ -367,7 +368,7 @@ bool get_textalignleft_cursor(uint16_t w, uint16_t h, int16_t *new_x, int16_t *n
   return true;
 }
 
-bool get_textaligncenter_cursor(uint16_t w, uint16_t h, int16_t *new_x, int16_t *new_y) {
+bool get_textaligncenter_cursor(int16_t ulx, int16_t uly, uint16_t w, uint16_t h, int16_t *new_x, int16_t *new_y) {
   int16_t x = led_matrix.getCursorX();
   int16_t y = led_matrix.getCursorY();
   // SerialCommand.printf("cur_x=%d,cur_y=%d\n", x, y);
@@ -381,6 +382,11 @@ bool get_textaligncenter_cursor(uint16_t w, uint16_t h, int16_t *new_x, int16_t 
     }
   }
   x = (led_matrix.width() - w) / 2;
+  if (x >= ulx) {
+    x -= ulx;
+  } else {
+    x = 0;
+  }
   // SerialCommand.printf("new_x=%d,new_y=%d\n", x, y);
   *new_x = x;
   *new_y = y;
@@ -492,9 +498,12 @@ void display_task() {
     } else if (cmd_type == "PT") { // print a string
       if (current_font_inf == NULL) {
         check_cursor();
-        led_matrix.println(cmd_parm);
+        String new_string = cmd_parm;
+        new_string.replace("\\", "\n");
+        print_hex(new_string);
+        led_matrix.println(new_string);
       } else {
-        int16_t x, y;
+        int16_t x, y, x1, y1;
         uint16_t w, h;
         String new_str = "";
 
@@ -502,7 +511,7 @@ void display_task() {
           if (cmd_parm == "") {
             break;
           }
-          get_text_newline(cmd_parm, new_str, &w, &h);
+          get_text_newline(cmd_parm, new_str, &x1, &y1, &w, &h);
           if (get_textalignleft_cursor(w, h, &x, &y)) {
             led_matrix.setCursor(x, y);
             led_matrix.println(new_str);
@@ -510,7 +519,7 @@ void display_task() {
         }
       }
     } else if (cmd_type == "PC") { // print a string with hozontal center alignment
-      int16_t x, y;
+      int16_t x, y, x1, y1;
       uint16_t w, h;
       String new_str = "";
 
@@ -518,15 +527,14 @@ void display_task() {
         if (cmd_parm == "") {
           break;
         }
-
-        get_text_newline(cmd_parm, new_str, &w, &h);
-        if (get_textaligncenter_cursor(w, h, &x, &y)) {
+        get_text_newline(cmd_parm, new_str, &x1, &y1, &w, &h);
+        if (get_textaligncenter_cursor(x1, y1, w, h, &x, &y)) {
           led_matrix.setCursor(x, y);
           led_matrix.println(new_str);
         }
       }
     } else if (cmd_type == "SC") { // print a string with screem center alignment
-      int16_t x, y;
+      int16_t x, y, x1, y1;
       uint16_t w, h;
       String new_str        = "";
       String tmp_str        = cmd_parm;
@@ -538,7 +546,7 @@ void display_task() {
       }
 
       // estimate total height
-      get_text_newline(cmd_parm, new_str, &w, &h);
+      get_text_newline(cmd_parm, new_str, &x1, &y1, &w, &h);
       if (h <= line_height) {
         total_height = h;
       }
@@ -546,7 +554,7 @@ void display_task() {
         if (cmd_parm == "") {
           break;
         }
-        get_text_newline(cmd_parm, new_str, &w, &h);
+        get_text_newline(cmd_parm, new_str, &x1, &y1, &w, &h);
         if (h <= line_height) {
           total_height += line_height;
         }
@@ -565,14 +573,14 @@ void display_task() {
         if (cmd_parm == "") {
           break;
         }
-        get_text_newline(cmd_parm, new_str, &w, &h);
+        get_text_newline(cmd_parm, new_str, &x1, &y1, &w, &h);
         if ((first_line_flag) && (current_font_inf != NULL)) {
           first_line_flag = false;
           y += h - 1;
           led_matrix.setCursor(0, y);
         }
         if (h <= line_height) {
-          if (get_textaligncenter_cursor(w, h, &x, &y)) {
+          if (get_textaligncenter_cursor(x1, y1, w, h, &x, &y)) {
             led_matrix.setCursor(x, y);
             led_matrix.println(new_str);
           }
