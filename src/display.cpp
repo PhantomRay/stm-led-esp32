@@ -500,7 +500,6 @@ void display_task() {
         check_cursor();
         String new_string = cmd_parm;
         new_string.replace("\\", "\n");
-        print_hex(new_string);
         led_matrix.println(new_string);
       } else {
         int16_t x, y, x1, y1;
