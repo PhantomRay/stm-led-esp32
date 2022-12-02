@@ -123,7 +123,6 @@ void command_init() {
   SerialCommand.setTimeout(50);
 }
 
-#define MAX_COMMAND_STRING 256
 void command_task(void *pvParameter) {
   String rx_buf;
   String command_rxbuffer = ""; // ="CL;F:font1;S:10;BG:255,0,0;TC:0,255,0;CR:10,20;P:\\HELLO, WORLD!\\;D:5000;CL\r";
