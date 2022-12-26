@@ -28,7 +28,7 @@ create a table in markdown
 | DL   | delay time                        | time ms          | DL:2000                   |
 | FS   | flash 4 rectangles                | times,delay      | FS:5,300 (5times, 300ms)  |
 
-## Type of Fonts
+# Type of Fonts
 
 FreeMono9pt7b, FreeMono12pt7b, FreeSans9pt7b, FreeSans12pt7b, FreeSerif9pt7b, FreeSerif12pt7b
 
@@ -47,7 +47,7 @@ result - x=?,y=?,x1=?,y1=?,w=?,h=? (w: width, h:height)
 Caution:
 Users should be careful when fonts are changed.
 
-### Code formatting
+# Code formatting
 
 Instasll clang-format v15.
 
