@@ -11,3 +11,4 @@ jobs:
         with:
           clang-format-version: "14"
           check-path: "src"
+          exclude-regex: Fonts
