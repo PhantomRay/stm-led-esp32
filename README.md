@@ -13,7 +13,7 @@
 | PT   | print a string(left)              |                  | PT:Hello World            |
 | PC   | print a string(horizontal center) |                  | PC:Hello\World            |
 | SC   | print a string(screen center)     |                  | SC:Hello\World            |
-| IM   | display image                     | image name       | IM:smile.bmp              |
+| IM   | display image                     | image name       | IM:happy.bmp, IM:sad.bmp  |
 | CI   | fill circle                       | x,y,radius,r,g,b | CI:x,y,radius,r,g,b       |
 | RT   | fill rectangle                    | x,y,w,h,r,g,b    | CI:x,y,width,height,r,g,b |
 | FL   | flush all command                 |                  | FL                        |
