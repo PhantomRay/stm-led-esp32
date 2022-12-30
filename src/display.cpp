@@ -4,29 +4,24 @@
 
 // https://rop.nl/truetype2gfx/
 
-#include <Fonts/FreeSans9pt7b.h>
-#include <Fonts/FreeSans12pt7b.h>
-#include <Fonts/FreeSans18pt7b.h>
-#include <Fonts/FreeSans24pt7b.h>
-#include <Fonts/FreeSans46pt7b.h>
+#include <Fonts/HWYGOTH14pt7b.h>
+#include <Fonts/HWYGOTH16pt7b.h>
+#include <Fonts/HWYGOTH18pt7b.h>
 
-#include <Fonts/FreeSansBold9pt7b.h>
-#include <Fonts/FreeSansBold12pt7b.h>
-#include <Fonts/FreeSansBold18pt7b.h>
-#include <Fonts/FreeSansBold24pt7b.h>
-#include <Fonts/FreeSansBold46pt7b.h>
-
+#include <Fonts/HWYGNRRW14pt7b.h>
+#include <Fonts/HWYGNRRW16pt7b.h>
+#include <Fonts/HWYGNRRW18pt7b.h>
+#include <Fonts/HWYGNRRW42pt7b.h>
+// HWYGOTH16pt7b
 typedef struct {
   String name;
   const GFXfont *param;
 } FONT_INFO;
-#define FONT_INFO_NUM 10
+#define FONT_INFO_NUM 8
 FONT_INFO font_inf[FONT_INFO_NUM] = {
-    {"FreeSans9pt7b", &FreeSans9pt7b},           {"FreeSans12pt7b", &FreeSans12pt7b},
-    {"FreeSans18pt7b", &FreeSans18pt7b},         {"FreeSans24pt7b", &FreeSans24pt7b},
-    {"FreeSans46pt7b", &FreeSans46pt7b},         {"FreeSansBold9pt7b", &FreeSansBold9pt7b},
-    {"FreeSansBold12pt7b", &FreeSansBold12pt7b}, {"FreeSansBold18pt7b", &FreeSansBold18pt7b},
-    {"FreeSansBold24pt7b", &FreeSansBold24pt7b}, {"FreeSansBold46pt7b", &FreeSansBold46pt7b},
+    {"HWYGOTH14pt7b", &HWYGOTH14pt7b},   {"HWYGOTH16pt7b", &HWYGOTH16pt7b},   {"HWYGOTH18pt7b", &HWYGOTH18pt7b},
+    {"HWYGNRRW14pt7b", &HWYGNRRW14pt7b}, {"HWYGNRRW16pt7b", &HWYGNRRW16pt7b}, {"HWYGNRRW18pt7b", &HWYGNRRW18pt7b},
+    {"HWYGNRRW42pt7b", &HWYGNRRW42pt7b},
 };
 FONT_INFO *current_font_inf = NULL;
 
