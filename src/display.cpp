@@ -495,7 +495,7 @@ void display_task() {
         check_cursor();
         String new_string = cmd_parm;
         new_string.replace("\\", "\n");
-        led_matrix.println(new_string);
+        led_matrix.print(new_string);
       } else {
         int16_t x, y, x1, y1;
         uint16_t w, h;
@@ -508,7 +508,7 @@ void display_task() {
           get_text_newline(cmd_parm, new_str, &x1, &y1, &w, &h);
           if (get_textalignleft_cursor(w, h, &x, &y)) {
             led_matrix.setCursor(x, y);
-            led_matrix.println(new_str);
+            led_matrix.print(new_str);
           }
         }
       }
