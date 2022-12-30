@@ -20,6 +20,7 @@
 | HP   | string information                | string           | HP:46 or HP:SLOW          |
 | DL   | delay time                        | in ms            | DL:2000                   |
 | FS   | flash 4 rectangles                | times,delay      | FS:5,300 (5times, 300ms)  |
+| RS   | restart system                    |                  | RS                        |
 
 # Type of Fonts
 

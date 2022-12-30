@@ -7,9 +7,9 @@
 // cursor set to 10,20, print "HELLO, WORLD!"
 
 // command_type_num = sizeof(command_type) / sizeof(command_type[0]);
-#define COMMAND_TYPE_NUM 18
-const String command_type[COMMAND_TYPE_NUM] = {"CL", "BR", "FT", "SZ", "BG", "TC", "CR", "GR", "PT",
-                                               "PC", "SC", "IM", "CI", "RT", "DL", "FL", "FS", "HP"};
+#define COMMAND_TYPE_NUM 19
+const String command_type[COMMAND_TYPE_NUM] = {"CL", "BR", "FT", "SZ", "BG", "TC", "CR", "GR", "PT", "PC",
+                                               "SC", "IM", "CI", "RT", "DL", "FL", "FS", "HP", "RS"};
 
 const char command_separate_char   = ';';
 const char parameter_separate_char = ':';
@@ -78,6 +78,8 @@ static LED_COMMAND_QUEUE *command_parsing(const String cmd_buf) {
           cmd_desc           = new LED_COMMAND_DESCRIPTION;
           cmd_desc->cmd.type = command_type[i];
           if (command_type[i] == "CL") {
+            cmd_desc->cmd.parameter = "";
+          } else if (command_type[i] == "RS") {
             cmd_desc->cmd.parameter = "";
           } else {
             cmd_parmeter_pos = cmd_string.indexOf(parameter_separate_char);

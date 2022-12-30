@@ -633,6 +633,9 @@ void display_task() {
     } else if (cmd_type == "DL") {
       int delay_tm = cmd_parm.toInt();
       display_delay((uint32_t)delay_tm);
+    } else if (cmd_type == "RS") {
+      Serial.println("Soft restarting...");
+      esp_restart();
     }
 
     bool load_flag = true;
