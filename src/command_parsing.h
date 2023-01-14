@@ -4,7 +4,7 @@
 #include "Arduino.h"
 
 // #define COMMAND_DEBUG
-#define COMMAND_SERIAL
+// #define COMMAND_SERIAL
 #ifdef COMMAND_SERIAL
 #define SerialCommand Serial1
 #define COMMAND_RX_PIN GPIO_NUM_21
