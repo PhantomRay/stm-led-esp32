@@ -43,7 +43,7 @@ void show_loading(bool no_file) {
   if (no_file) {
     led_matrix.setTextSize(1);
     led_matrix.setTextColor(led_matrix.color565(255, 0, 0));
-    led_matrix.setCursor(20, 28);
+    led_matrix.setCursor(21, 28);
     led_matrix.setTextColor(led_matrix.color565(255, 255, 255));
     led_matrix.print("NO IMAGES");
   } else {

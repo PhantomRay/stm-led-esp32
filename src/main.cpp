@@ -14,8 +14,8 @@ void setup() {
     return;
   }
 
-  File file    = SPIFFS.open("/ok", "r");
-  bool no_file = !file;
+  File file    = SPIFFS.open("/exists");
+  bool no_file = !(file.size() > 0); // DO NOT use !file
   file.close();
 
   if (no_file) {
