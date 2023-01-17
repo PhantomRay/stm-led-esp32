@@ -65,6 +65,7 @@ typedef struct {
 } FLASHER_DESC;
 
 void command_init();
+void show_loading(bool no_file);
 void command_task(void *pvParameter);
 void clear_command_desc(LED_COMMAND_DESCRIPTION *p_command_desc_first);
 

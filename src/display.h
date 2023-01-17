@@ -3,7 +3,7 @@
 
 #include "command_parsing.h"
 
-void display_init();
+void display_init(bool no_file);
 void display_task();
 void set_queue(LED_COMMAND_QUEUE *cmd_queue);
 

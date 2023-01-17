@@ -1,4 +1,4 @@
-# Command List
+## Command List
 
 | type | function                          | parameter        | example                   |
 | ---- | --------------------------------- | ---------------- | ------------------------- |
@@ -22,25 +22,42 @@
 | FS   | flash 4 rectangles                | times,delay      | FS:5,300 (5times, 300ms)  |
 | RS   | restart system                    |                  | RS                        |
 
-# Type of Fonts
+## Fonts
 
-- default
-- HWYGOTH14pt7b
-- HWYGOTH16pt7b
-- HWYGOTH18pt7b
-- HWYGNRRW14pt7b
-- HWYGNRRW16pt7b
-- HWYGNRRW18pt7b
-- HWYGNRRW42pt7b
+Available fonts are as follows:
 
-; Get the width and height of a string
+- default (monospace)
+- HWYGOTH14pt7b (highway gothic 14)
+- HWYGOTH16pt7b (highway gothic 16)
+- HWYGOTH18pt7b (highway gothic 18)
+- HWYGNRRW14pt7b (highway gothic narrow 14)
+- HWYGNRRW16pt7b (highway gothic narrow 16)
+- HWYGNRRW18pt7b (highway gothic narrow 18)
+- HWYGNRRW42pt7b (highway gothic narrow 42)
+
+Highway Gothic: https://www.dafont.com/highway-gothic.font
+
+### Convert font file using fontconvert
+
+```sh
+fontconvert HWYGNRRW.TTF 12 > HWYGNRRW12pt7b.h
+
+```
+
+### Build fontconvert
+
+https://github.com/PhantomRay/stm-led-esp32/wiki/fontconvert
+
+### Misc
+
+Get the width and height of a string
+
+```
 command - FT:FreeSerif12pt7b;HP:Hello
 result - x=?,y=?,x1=?,y1=?,w=?,h=? (w: width, h:height)
+```
 
-Caution:
-Users should be careful when fonts are changed.
-
-# Code Formatting
+## Code Formatting
 
 Instasll clang-format v15.
 
