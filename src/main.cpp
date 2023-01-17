@@ -24,6 +24,8 @@ void setup() {
                           0,              /* Priority of the task */
                           NULL,           /* Task handle. */
                           1);             /* Core where the task should run */
+
+  Serial.println("setup() complete");
 }
 
 void loop() {
