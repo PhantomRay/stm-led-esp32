@@ -28,28 +28,38 @@ FONT_INFO *current_font_inf = NULL;
 LED_COMMAND_QUEUE command_queue = {NULL, NULL, 0, false};
 bool command_queue_stop_flag    = false;
 
-void display_init() {
+void display_init(bool no_file) {
   command_queue           = {NULL, NULL, 0, false};
   command_queue_stop_flag = false;
 
   led_matrix.begin();
   command_init();
-  show_loading();
+  show_loading(no_file);
 }
 
-void show_loading() {
+void show_loading(bool no_file) {
   led_matrix.setPanelBrightness(30);
-  led_matrix.setTextSize(1);
-  led_matrix.setTextColor(led_matrix.color565(255, 0, 0));
-  led_matrix.setCursor(0, 20);
-  led_matrix.print("RADAR");
-  led_matrix.setTextColor(led_matrix.color565(0, 255, 0));
-  led_matrix.print("SIGN");
-  led_matrix.setTextColor(led_matrix.color565(0, 0, 255));
-  led_matrix.print(".COM.AU");
-  led_matrix.setCursor(28, 35);
-  led_matrix.setTextColor(led_matrix.color565(255, 255, 255));
-  led_matrix.print("LOADING");
+
+  if (no_file) {
+    led_matrix.setTextSize(1);
+    led_matrix.setTextColor(led_matrix.color565(255, 0, 0));
+    led_matrix.setCursor(20, 28);
+    led_matrix.setTextColor(led_matrix.color565(255, 255, 255));
+    led_matrix.print("NO IMAGES");
+  } else {
+    led_matrix.setTextSize(1);
+    led_matrix.setTextColor(led_matrix.color565(255, 0, 0));
+    led_matrix.setCursor(0, 20);
+    led_matrix.print("RADAR");
+    led_matrix.setTextColor(led_matrix.color565(0, 255, 0));
+    led_matrix.print("SIGN");
+    led_matrix.setTextColor(led_matrix.color565(0, 0, 255));
+    led_matrix.print(".COM.AU");
+    led_matrix.setCursor(28, 35);
+    led_matrix.setTextColor(led_matrix.color565(255, 255, 255));
+    led_matrix.print("LOADING");
+  }
+
   led_matrix.showDMABuffer(true);
 }
 
