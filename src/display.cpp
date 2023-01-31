@@ -1,5 +1,6 @@
 #include "SPIFFS.h"
 #include "display.h"
+#include "version.h"
 #include "ESP32-ICND2153-I2S-DMA.h"
 
 // https://rop.nl/truetype2gfx/
@@ -52,6 +53,10 @@ void show_loading(bool no_file) {
   led_matrix.setTextColor(led_matrix.color565(255, 255, 255));
   led_matrix.setCursor(no_file ? 21 : 28, 35);
   led_matrix.print(no_file ? "NO IMAGES" : "LOADING");
+
+  led_matrix.setTextColor(led_matrix.color565(255, 255, 255));
+  led_matrix.setCursor(33, 55);
+  led_matrix.print(VERSION);
 
   led_matrix.showDMABuffer(true);
 }
