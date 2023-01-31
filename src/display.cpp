@@ -655,8 +655,7 @@ void display_task() {
       display_delay((uint32_t)delay_tm);
     } else if (cmd_type == "RS") {
       Serial.println("Reset screen...");
-      delay(100);
-      led_matrix.begin();
+      esp_restart();
     }
 
     bool load_flag = true;
