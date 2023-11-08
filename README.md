@@ -2,11 +2,17 @@
 
 Display text on LED Matrix using ESP32 and LED control board over USB.
 
+## Dev Environment
+
+PlatformIO
+
 ## Hardware
 
-* ESP32
-* https://www.electrodragon.com/product/rgb-matrix-panel-drive-board-raspberry-pi/
-* 3 Panels of 64x32 Outdoor LED Matrix (Chip 2153)
+- ESP32 (esp32doit-devkit-v1 or firebeetle32)
+- https://www.electrodragon.com/product/rgb-matrix-panel-drive-board-raspberry-pi/
+- 3 Panels of 64x32 Outdoor LED Matrix (Chip 2153)
+
+![Setup](doc/setup.png)
 
 ## Command List
 
