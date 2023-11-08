@@ -1,3 +1,13 @@
+# NO SUPPORT WILL BE PROVIDED
+
+Display text on LED Matrix using ESP32 and LED control board over USB.
+
+## Hardware
+
+* ESP32
+* https://www.electrodragon.com/product/rgb-matrix-panel-drive-board-raspberry-pi/
+* 3 Panels of 64x32 Outdoor LED Matrix (Chip 2153)
+
 ## Command List
 
 | type | function                          | parameter        | example                   |
